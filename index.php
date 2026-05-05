@@ -109,11 +109,24 @@ if (is_logged_in()) {
     </section>
 
     <!-- Footer -->
-    <footer class="landing-footer">
-        <p>© <?= date('Y') ?> TekTool — C&W Services Field Tech Platform &nbsp;·&nbsp;
-        <a href="/auth/login.php">Sign In</a> &nbsp;·&nbsp;
-        <a href="/auth/register.php">Register</a></p>
-    </footer>
+    <footer class="site-footer">
+    <div class="footer-content">
+        <div class="footer-legal">
+            <div class="legal-row">
+                <span>&copy; 2026 <strong>Kaltum LLC</strong>. All Rights Reserved.</span>
+                <span style="margin: 0 10px; opacity: 0.3;">|</span>
+                <span>Developed for the <strong>C&W Services</strong> Field Tech Platform.</span>
+            </div>
+            
+            <div class="footer-links">
+                <a href="/privacy">Privacy</a>
+                <a href="/terms">Terms</a>
+                <a href="/security">Security</a>
+                <a href="/support">Support</a>
+            </div>
+        </div>
+    </div>
+</footer>
 
 </body>
 </html>
