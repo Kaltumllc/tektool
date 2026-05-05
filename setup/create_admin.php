@@ -13,7 +13,7 @@ require_once '../config/db.php';
 
 // ── CONFIGURE THESE THREE VALUES BEFORE UPLOADING ──────────────────────────
 $SECRET       = 'Mustapha2026Tek!';   // Change to something only you know
-$TARGET_EMAIL = 'your actual TekTool login email here'; // The account you want to promote to admin
+$TARGET_EMAIL = 'info@kaltum.com'; // The account you want to promote to admin
 $CREATE_IF_MISSING = false;              // Set true to create the account if it doesn't exist
 $NEW_PASSWORD  = 'ChangeMe123!';        // Only used if CREATE_IF_MISSING = true
 $NEW_FULL_NAME = 'Mustapha Ibrahim';    // Only used if CREATE_IF_MISSING = true
