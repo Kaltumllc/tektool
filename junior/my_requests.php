@@ -24,7 +24,7 @@ require_once '../includes/header.php';
 
 <div class="page-header">
     <h1>My Requests</h1>
-    <a href="/tektool/junior/submit_request.php" class="btn btn-primary">+ New Request</a>
+    <a href="/junior/submit_request.php" class="btn btn-primary">+ New Request</a>
 </div>
 
 <!-- Filter Tabs -->
@@ -38,7 +38,7 @@ require_once '../includes/header.php';
 <div class="card">
     <?php if (mysqli_num_rows($result) === 0): ?>
         <div class="empty-state">
-            <p>No requests found. <a href="/tektool/junior/submit_request.php">Submit one now</a>.</p>
+            <p>No requests found. <a href="/junior/submit_request.php">Submit one now</a>.</p>
         </div>
     <?php else: ?>
         <div class="request-list">

@@ -5,7 +5,7 @@ require_once 'includes/auth_guard.php';
 // If already logged in redirect to their dashboard
 if (is_logged_in()) {
     $role = $_SESSION['role'];
-    header("Location: /tektool/$role/dashboard.php");
+    header("Location: /$role/dashboard.php");
     exit();
 }
 ?>
@@ -15,7 +15,7 @@ if (is_logged_in()) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TekTool — Field Tech Support Platform</title>
-    <link rel="stylesheet" href="/tektool/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 <body class="landing-page">
 
@@ -24,8 +24,8 @@ if (is_logged_in()) {
         <div class="landing-nav-inner">
             <span class="nav-brand">⚙️ TekTool</span>
             <div style="display:flex; gap:1rem;">
-                <a href="/tektool/auth/login.php" class="btn btn-outline btn-sm">Sign In</a>
-                <a href="/tektool/auth/register.php" class="btn btn-primary btn-sm">Get Started</a>
+                <a href="/auth/login.php" class="btn btn-outline btn-sm">Sign In</a>
+                <a href="/auth/register.php" class="btn btn-primary btn-sm">Get Started</a>
             </div>
         </div>
     </nav>
@@ -37,8 +37,8 @@ if (is_logged_in()) {
             <h1 class="hero-title">Get Expert Help<br>On the Job Site — <span class="hero-accent">Instantly</span></h1>
             <p class="hero-sub">TekTool connects field technicians with experienced lead techs in real time. Submit a request, get matched, get back to work.</p>
             <div class="hero-cta">
-                <a href="/tektool/auth/register.php" class="btn btn-primary btn-lg">Start For Free</a>
-                <a href="/tektool/auth/login.php" class="btn btn-outline btn-lg">Sign In</a>
+                <a href="/auth/register.php" class="btn btn-primary btn-lg">Start For Free</a>
+                <a href="/auth/login.php" class="btn btn-outline btn-lg">Sign In</a>
             </div>
         </div>
     </section>
@@ -111,8 +111,8 @@ if (is_logged_in()) {
     <!-- Footer -->
     <footer class="landing-footer">
         <p>© <?= date('Y') ?> TekTool — C&W Services Field Tech Platform &nbsp;·&nbsp;
-        <a href="/tektool/auth/login.php">Sign In</a> &nbsp;·&nbsp;
-        <a href="/tektool/auth/register.php">Register</a></p>
+        <a href="/auth/login.php">Sign In</a> &nbsp;·&nbsp;
+        <a href="/auth/register.php">Register</a></p>
     </footer>
 
 </body>

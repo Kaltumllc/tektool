@@ -48,7 +48,7 @@ if (!in_array($mimetype, $allowed)) {
     exit();
 }
 
-$upload_dir = $_SERVER['DOCUMENT_ROOT'] . '/tektool/uploads/videos/';
+$upload_dir = $_SERVER['DOCUMENT_ROOT'] . '/uploads/videos/';
 if (!is_dir($upload_dir)) {
     mkdir($upload_dir, 0755, true);
 }
@@ -73,7 +73,7 @@ if (move_uploaded_file($file['tmp_name'], $dest)) {
     echo json_encode([
         'success'  => true,
         'filename' => $filename,
-        'url'      => '/tektool/uploads/videos/' . $filename
+        'url'      => '/uploads/videos/' . $filename
     ]);
 } else {
     echo json_encode(['error' => 'Upload failed. Check folder permissions.']);

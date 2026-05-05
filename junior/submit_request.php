@@ -62,7 +62,7 @@ require_once '../includes/header.php';
 
 <div class="page-header">
     <h1>Submit Help Request</h1>
-    <a href="/tektool/junior/dashboard.php" class="btn btn-outline btn-sm">← Back</a>
+    <a href="/junior/dashboard.php" class="btn btn-outline btn-sm">← Back</a>
 </div>
 
 <?php if ($error): ?>
@@ -71,7 +71,7 @@ require_once '../includes/header.php';
 <?php if ($success): ?>
     <div class="alert alert-success">
         <?= htmlspecialchars($success) ?>
-        <a href="/tektool/junior/my_requests.php"> View my requests →</a>
+        <a href="/junior/my_requests.php"> View my requests →</a>
     </div>
 <?php endif; ?>
 
@@ -113,7 +113,7 @@ require_once '../includes/header.php';
             </div>
             <div style="display:flex; gap:1rem; flex-wrap:wrap;">
                 <button type="submit" class="btn btn-primary">Submit Request</button>
-                <a href="/tektool/junior/dashboard.php" class="btn btn-outline">Cancel</a>
+                <a href="/junior/dashboard.php" class="btn btn-outline">Cancel</a>
             </div>
         </form>
     </div>

@@ -98,7 +98,7 @@ require_once '../includes/header.php';
                         </span>
                         <span class="request-desc"><?= htmlspecialchars(substr($req['description'], 0, 100)) ?>...</span>
                     </div>
-                    <form method="POST" action="/tektool/senior/active_request.php">
+                    <form method="POST" action="/senior/active_request.php">
                         <input type="hidden" name="request_id" value="<?= $req['id'] ?>">
                         <button type="submit" class="btn btn-primary btn-sm">Accept</button>
                     </form>
@@ -119,7 +119,7 @@ require_once '../includes/header.php';
                     <span class="request-title"><?= htmlspecialchars($req['title']) ?></span>
                     <span class="request-meta">From <?= htmlspecialchars($req['junior_name']) ?></span>
                 </div>
-                <a href="/tektool/senior/active_request.php?id=<?= $req['id'] ?>" class="btn btn-sm btn-outline">Continue</a>
+                <a href="/senior/active_request.php?id=<?= $req['id'] ?>" class="btn btn-sm btn-outline">Continue</a>
             </div>
         <?php endwhile; ?>
     </div>
@@ -128,7 +128,7 @@ require_once '../includes/header.php';
 
 <script>
 function updateAvailability(isAvailable) {
-    fetch('/tektool/api/set_availability.php', {
+    fetch('/api/set_availability.php', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({available: isAvailable ? 1 : 0})

@@ -3,7 +3,7 @@ require_once '../config/db.php';
 require_once '../includes/auth_guard.php';
 
 if (is_logged_in()) {
-    header('Location: /tektool/index.php');
+    header('Location: /index.php');
     exit();
 }
 
@@ -36,9 +36,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Role-based redirect
             switch ($user['role']) {
-                case 'junior': header('Location: /tektool/junior/dashboard.php'); break;
-                case 'senior': header('Location: /tektool/senior/dashboard.php'); break;
-                case 'admin':  header('Location: /tektool/admin/dashboard.php');  break;
+                case 'junior': header('Location: /junior/dashboard.php'); break;
+                case 'senior': header('Location: /senior/dashboard.php'); break;
+                case 'admin':  header('Location: /admin/dashboard.php');  break;
             }
             exit();
         } else {
@@ -53,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login — TekTool</title>
-    <link rel="stylesheet" href="/tektool/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 <body class="auth-page">
     <div class="auth-card">

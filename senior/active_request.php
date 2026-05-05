@@ -54,7 +54,7 @@ if ($request_id <= 0) {
 }
 
 if ($request_id <= 0) {
-    header('Location: /tektool/senior/dashboard.php');
+    header('Location: /senior/dashboard.php');
     exit();
 }
 
@@ -82,7 +82,7 @@ $request = mysqli_fetch_assoc($result_request);
 mysqli_stmt_close($stmt_request);
 
 if (!$request) {
-    header('Location: /tektool/senior/dashboard.php');
+    header('Location: /senior/dashboard.php');
     exit();
 }
 
@@ -114,7 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['escalate'])) {
                 }
 
                 mysqli_stmt_close($stmt_esc);
-                header('Location: /tektool/senior/dashboard.php');
+                header('Location: /senior/dashboard.php');
                 exit();
             }
 
@@ -169,7 +169,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['resolve'])) {
                 }
 
                 mysqli_stmt_close($stmt_resolve);
-                header('Location: /tektool/senior/dashboard.php');
+                header('Location: /senior/dashboard.php');
                 exit();
             }
 
@@ -208,7 +208,7 @@ require_once '../includes/header.php';
 
 <div class="page-header">
     <h1>Active Request #<?= (int)$request_id ?></h1>
-    <a href="/tektool/senior/dashboard.php" class="btn btn-outline btn-sm">← Back</a>
+    <a href="/senior/dashboard.php" class="btn btn-outline btn-sm">← Back</a>
 </div>
 
 <?php if ($error): ?>
@@ -269,7 +269,7 @@ require_once '../includes/header.php';
                         <?php while ($vid = mysqli_fetch_assoc($videos)): ?>
                             <div class="video-item" style="margin-bottom:1rem;">
                                 <video controls style="width:100%; border-radius:var(--radius); margin-bottom:0.5rem;">
-                                    <source src="/tektool/uploads/videos/<?= rawurlencode($vid['filename']) ?>">
+                                    <source src="/uploads/videos/<?= rawurlencode($vid['filename']) ?>">
                                     Your browser does not support the video tag.
                                 </video>
                                 <div style="font-size:0.8rem; color:var(--muted);">
@@ -451,7 +451,7 @@ async function sendChat() {
     appendMessage('ai', '<em>TekBot is thinking...</em>');
 
     try {
-        const res = await fetch('/tektool/api/ai_chat.php', {
+        const res = await fetch('/api/ai_chat.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -521,7 +521,7 @@ async function uploadVideo() {
     fd.append('request_id', REQUEST_ID);
 
     try {
-        const res = await fetch('/tektool/api/upload_video.php', {
+        const res = await fetch('/api/upload_video.php', {
             method: 'POST',
             body: fd
         });
@@ -638,7 +638,7 @@ async function uploadRecorded() {
     fd.append('request_id', REQUEST_ID);
 
     try {
-        const res = await fetch('/tektool/api/upload_video.php', {
+        const res = await fetch('/api/upload_video.php', {
             method: 'POST',
             body: fd
         });

@@ -8,18 +8,18 @@ $name     = $_SESSION['full_name'] ?? '';
 
 $nav_links = [
     'junior' => [
-        ['label' => 'Dashboard',    'href' => '/tektool/junior/dashboard.php'],
-        ['label' => 'New Request',  'href' => '/tektool/junior/submit_request.php'],
-        ['label' => 'My Requests',  'href' => '/tektool/junior/my_requests.php'],
+        ['label' => 'Dashboard',    'href' => '/junior/dashboard.php'],
+        ['label' => 'New Request',  'href' => '/junior/submit_request.php'],
+        ['label' => 'My Requests',  'href' => '/junior/my_requests.php'],
     ],
     'senior' => [
-        ['label' => 'Dashboard',    'href' => '/tektool/senior/dashboard.php'],
-        ['label' => 'Availability', 'href' => '/tektool/senior/set_availability.php'],
+        ['label' => 'Dashboard',    'href' => '/senior/dashboard.php'],
+        ['label' => 'Availability', 'href' => '/senior/set_availability.php'],
     ],
     'admin' => [
-        ['label' => 'Dashboard',    'href' => '/tektool/admin/dashboard.php'],
-        ['label' => 'Manage Users', 'href' => '/tektool/admin/manage_users.php'],
-        ['label' => 'Knowledge Base','href' => '/tektool/knowledge_base/view_resolutions.php'],
+        ['label' => 'Dashboard',    'href' => '/admin/dashboard.php'],
+        ['label' => 'Manage Users', 'href' => '/admin/manage_users.php'],
+        ['label' => 'Knowledge Base','href' => '/knowledge_base/view_resolutions.php'],
     ],
 ];
 ?>
@@ -29,12 +29,12 @@ $nav_links = [
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $app_name ?></title>
-    <link rel="stylesheet" href="/tektool/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 <body>
 <nav class="navbar">
     <div class="nav-inner">
-        <a href="/tektool/<?= $role ?>/dashboard.php" class="nav-brand">⚙️ TekTool</a>
+        <a href="/<?= $role ?>/dashboard.php" class="nav-brand">⚙️ TekTool</a>
 
         <button class="nav-toggle" onclick="toggleNav()" aria-label="Menu">
             <span></span><span></span><span></span>
@@ -47,7 +47,7 @@ $nav_links = [
                     <?= $link['label'] ?>
                 </a>
             <?php endforeach; ?>
-            <a href="/tektool/auth/logout.php" class="nav-link nav-logout">Logout</a>
+            <a href="/auth/logout.php" class="nav-link nav-logout">Logout</a>
         </div>
 
         <div class="nav-user">

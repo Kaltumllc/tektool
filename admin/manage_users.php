@@ -47,7 +47,7 @@ require_once '../includes/header.php';
 
 <div class="page-header">
     <h1>Manage Users</h1>
-    <a href="/tektool/auth/register.php" target="_blank" class="btn btn-primary btn-sm">+ Add User</a>
+    <a href="/auth/register.php" target="_blank" class="btn btn-primary btn-sm">+ Add User</a>
 </div>
 
 <?php if ($message): ?>

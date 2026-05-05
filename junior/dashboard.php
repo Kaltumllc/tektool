@@ -33,7 +33,7 @@ require_once '../includes/header.php';
 
 <div class="page-header">
     <h1>Welcome back, <?= htmlspecialchars(explode(' ', $_SESSION['full_name'])[0]) ?> 👋</h1>
-    <a href="/tektool/junior/submit_request.php" class="btn btn-primary">+ New Request</a>
+    <a href="/junior/submit_request.php" class="btn btn-primary">+ New Request</a>
 </div>
 
 <!-- Stats -->
@@ -60,11 +60,11 @@ require_once '../includes/header.php';
 <div class="card">
     <div class="card-header">
         <h2>Recent Requests</h2>
-        <a href="/tektool/junior/my_requests.php" class="btn-link">View all →</a>
+        <a href="/junior/my_requests.php" class="btn-link">View all →</a>
     </div>
     <?php if (mysqli_num_rows($recent) === 0): ?>
         <div class="empty-state">
-            <p>No requests yet. <a href="/tektool/junior/submit_request.php">Submit your first one</a>.</p>
+            <p>No requests yet. <a href="/junior/submit_request.php">Submit your first one</a>.</p>
         </div>
     <?php else: ?>
         <div class="request-list">
