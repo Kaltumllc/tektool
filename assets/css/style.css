@@ -1,51 +1,92 @@
-/* --- Sophisticated Industry Variables --- */
+/* TekTool.app - Sophisticated Industry Design */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
 :root {
-    --brand-blue: #0052cc;      /* High-performance Blue */
-    --deep-navy: #05192d;       /* Professional Background */
-    --slate-text: #4a5568;      /* Modern body text */
-    --glass: rgba(255, 255, 255, 0.9);
+    --primary: #0052cc;
+    --navy: #05192d;
+    --accent: #ffd700; /* Gold for the 'Instantly' text */
+    --bg-light: #f8fafc;
+    --white: #ffffff;
+    --glass: rgba(255, 255, 255, 0.95);
 }
 
-/* --- Sophisticated Footer Styling --- */
-.site-footer {
-    background: #f8fafc;
-    border-top: 1px solid #e2e8f0;
-    padding: 60px 0 30px;
-    color: var(--slate-text);
-    font-size: 0.9rem;
-    width: 100%;
+body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-light);
+    color: #334155;
+    line-height: 1.6;
 }
 
-.footer-content {
+/* --- Navigation --- */
+.landing-nav {
+    background: var(--white);
+    padding: 1rem 2rem;
+    border-bottom: 1px solid #e2e8f0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.landing-nav-inner {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 20px;
-}
-
-.footer-legal {
-    text-align: center;
-    margin-top: 40px;
-    padding-top: 20px;
-    border-top: 1px solid #edf2f7;
-}
-
-.footer-legal strong {
-    color: var(--deep-navy);
-}
-
-.footer-links {
-    margin-top: 10px;
     display: flex;
-    justify-content: center;
-    gap: 20px;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.footer-links a {
-    color: var(--slate-text);
-    text-decoration: none;
-    font-weight: 500;
+/* --- Hero Section (The "Rich" Gradient) --- */
+.hero {
+    background: radial-gradient(circle at top right, var(--primary), var(--navy));
+    color: white;
+    padding: 120px 20px;
+    text-align: center;
 }
 
-.footer-links a:hover {
-    color: var(--brand-blue);
+.hero-badge {
+    background: rgba(255,255,255,0.1);
+    padding: 8px 16px;
+    border-radius: 20px;
+    display: inline-block;
+    font-size: 0.85rem;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.hero-title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 20px;
+}
+
+.hero-accent { color: var(--accent); }
+
+/* --- Features Grid --- */
+.features { padding: 80px 20px; }
+.features-inner { max-width: 1200px; margin: 0 auto; }
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 30px;
+}
+
+.feature-card {
+    background: var(--white);
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(5, 25, 45, 0.05);
+    border: 1px solid #f1f5f9;
+    transition: transform 0.3s ease;
+}
+
+.feature-card:hover { transform: translateY(-10px); }
+
+/* --- Footer --- */
+.site-footer {
+    background: #f1f5f9;
+    padding: 60px 20px;
+    border-top: 1px solid #e2e8f0;
 }
