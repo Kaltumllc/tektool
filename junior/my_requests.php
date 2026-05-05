@@ -5,13 +5,13 @@ require_role('junior');
 
 $user_id = $_SESSION['user_id'];
 
-// Filter
 $filter = $_GET['status'] ?? 'all';
 $where  = $filter !== 'all' ? "AND hr.status = '$filter'" : '';
 
+// FIX: removed resolved_at — column does not exist in help_requests
 $result = mysqli_query($conn, "
     SELECT hr.id, hr.title, hr.description, hr.status,
-           hr.created_at, hr.resolved_at,
+           hr.created_at,
            u.full_name as senior_name
     FROM help_requests hr
     LEFT JOIN users u ON hr.senior_id = u.id
@@ -27,7 +27,6 @@ require_once '../includes/header.php';
     <a href="/junior/submit_request.php" class="btn btn-primary">+ New Request</a>
 </div>
 
-<!-- Filter Tabs -->
 <div class="filter-tabs">
     <a href="?status=all"         class="filter-tab <?= $filter==='all'         ? 'active':'' ?>">All</a>
     <a href="?status=open"        class="filter-tab <?= $filter==='open'        ? 'active':'' ?>">Open</a>
@@ -36,7 +35,7 @@ require_once '../includes/header.php';
 </div>
 
 <div class="card">
-    <?php if (mysqli_num_rows($result) === 0): ?>
+    <?php if (!$result || mysqli_num_rows($result) === 0): ?>
         <div class="empty-state">
             <p>No requests found. <a href="/junior/submit_request.php">Submit one now</a>.</p>
         </div>
@@ -60,9 +59,6 @@ require_once '../includes/header.php';
                                 : '⏳ Awaiting assignment' ?>
                             &nbsp;·&nbsp;
                             Submitted <?= date('M j, Y g:i A', strtotime($req['created_at'])) ?>
-                            <?php if ($req['resolved_at']): ?>
-                                &nbsp;·&nbsp; Resolved <?= date('M j, Y', strtotime($req['resolved_at'])) ?>
-                            <?php endif; ?>
                         </span>
                     </div>
                 </div>

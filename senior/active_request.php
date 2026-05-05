@@ -1,7 +1,6 @@
 <?php
 require_once '../config/db.php';
 require_once '../includes/auth_guard.php';
-
 require_role('senior');
 
 $user_id    = (int)($_SESSION['user_id'] ?? 0);
@@ -39,7 +38,6 @@ if (
                 mysqli_stmt_close($log);
             }
         }
-
         mysqli_stmt_close($stmt_accept);
     } else {
         $error = 'Unable to accept the request at this time.';
@@ -75,10 +73,8 @@ if (!$stmt_request) {
 
 mysqli_stmt_bind_param($stmt_request, 'ii', $request_id, $user_id);
 mysqli_stmt_execute($stmt_request);
-
 $result_request = mysqli_stmt_get_result($stmt_request);
 $request = mysqli_fetch_assoc($result_request);
-
 mysqli_stmt_close($stmt_request);
 
 if (!$request) {
@@ -88,15 +84,19 @@ if (!$request) {
 
 // -----------------------------
 // Handle escalation
+// FIX: removed resolved_at = NOW() — column does not exist in help_requests
+// FIX: 'escalated' is not a valid ENUM value — use 'resolved' with note prefix
 // -----------------------------
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['escalate'])) {
     $note = trim($_POST['resolution_note'] ?? '');
 
     if ($note !== '') {
+        // FIX: status ENUM only has: pending, open, in_progress, resolved
+        // We mark as resolved but prefix the note with [ESCALATED]
         $stmt_esc = mysqli_prepare(
             $conn,
             "UPDATE help_requests
-             SET status = 'escalated', resolved_at = NOW()
+             SET status = 'resolved'
              WHERE id = ? AND senior_id = ? AND status = 'in_progress'"
         );
 
@@ -105,6 +105,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['escalate'])) {
             mysqli_stmt_execute($stmt_esc);
 
             if (mysqli_stmt_affected_rows($stmt_esc) > 0) {
+                // FIX: use resolution_text + resolved_by; removed tags column
+                $escalate_note = "[ESCALATED] " . $note;
+                $stmt_resolution = mysqli_prepare(
+                    $conn,
+                    "INSERT INTO resolutions (request_id, resolved_by, resolution_text)
+                     VALUES (?, ?, ?)"
+                );
+                if ($stmt_resolution) {
+                    mysqli_stmt_bind_param($stmt_resolution, 'iis', $request_id, $user_id, $escalate_note);
+                    mysqli_stmt_execute($stmt_resolution);
+                    mysqli_stmt_close($stmt_resolution);
+                }
+
                 $action = "Request #$request_id escalated by senior #$user_id - Note: $note";
                 $log = mysqli_prepare($conn, "INSERT INTO audit_log (user_id, action) VALUES (?, ?)");
                 if ($log) {
@@ -130,16 +143,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['escalate'])) {
 
 // -----------------------------
 // Handle resolution
+// FIX: removed resolved_at = NOW() — column does not exist
+// FIX: use resolution_text + resolved_by instead of resolution_note + tags
 // -----------------------------
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['resolve'])) {
     $note = trim($_POST['resolution_note'] ?? '');
-    $tags = trim($_POST['tags'] ?? '');
 
     if ($note !== '') {
         $stmt_resolve = mysqli_prepare(
             $conn,
             "UPDATE help_requests
-             SET status = 'resolved', resolved_at = NOW()
+             SET status = 'resolved'
              WHERE id = ? AND senior_id = ? AND status = 'in_progress'"
         );
 
@@ -148,14 +162,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['resolve'])) {
             mysqli_stmt_execute($stmt_resolve);
 
             if (mysqli_stmt_affected_rows($stmt_resolve) > 0) {
+                // FIX: correct columns — resolution_text, resolved_by (not resolution_note, tags)
                 $stmt_resolution = mysqli_prepare(
                     $conn,
-                    "INSERT INTO resolutions (request_id, resolution_note, tags)
+                    "INSERT INTO resolutions (request_id, resolved_by, resolution_text)
                      VALUES (?, ?, ?)"
                 );
 
                 if ($stmt_resolution) {
-                    mysqli_stmt_bind_param($stmt_resolution, 'iss', $request_id, $note, $tags);
+                    mysqli_stmt_bind_param($stmt_resolution, 'iis', $request_id, $user_id, $note);
                     mysqli_stmt_execute($stmt_resolution);
                     mysqli_stmt_close($stmt_resolution);
                 }
@@ -185,6 +200,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['resolve'])) {
 
 // -----------------------------
 // Load videos
+// FIX: use created_at not uploaded_at — column is created_at in videos table
 // -----------------------------
 $stmt_videos = mysqli_prepare(
     $conn,
@@ -192,7 +208,7 @@ $stmt_videos = mysqli_prepare(
      FROM videos v
      JOIN users u ON v.uploader_id = u.id
      WHERE v.request_id = ?
-     ORDER BY v.uploaded_at DESC"
+     ORDER BY v.created_at DESC"
 );
 
 if ($stmt_videos) {
@@ -226,29 +242,24 @@ require_once '../includes/header.php';
                     <span class="detail-label">From</span>
                     <span><?= htmlspecialchars($request['junior_name']) ?></span>
                 </div>
-
                 <div class="detail-row">
                     <span class="detail-label">Email</span>
                     <span><?= htmlspecialchars($request['junior_email']) ?></span>
                 </div>
-
                 <div class="detail-row">
                     <span class="detail-label">Status</span>
                     <span class="status-badge status-<?= htmlspecialchars($request['status']) ?>">
                         <?= htmlspecialchars(ucfirst(str_replace('_', ' ', $request['status']))) ?>
                     </span>
                 </div>
-
                 <div class="detail-row">
                     <span class="detail-label">Submitted</span>
                     <span><?= date('M j, Y g:i A', strtotime($request['created_at'])) ?></span>
                 </div>
-
                 <div class="detail-row">
                     <span class="detail-label">Title</span>
                     <span><?= htmlspecialchars($request['title']) ?></span>
                 </div>
-
                 <div style="margin-top:1rem;">
                     <div class="detail-label" style="margin-bottom:0.5rem;">Description</div>
                     <div class="description-box">
@@ -263,7 +274,6 @@ require_once '../includes/header.php';
                 <h2>📹 Videos</h2>
             </div>
             <div style="padding:1.25rem;">
-
                 <?php if ($videos && mysqli_num_rows($videos) > 0): ?>
                     <div style="margin-bottom:1rem;">
                         <?php while ($vid = mysqli_fetch_assoc($videos)): ?>
@@ -272,9 +282,10 @@ require_once '../includes/header.php';
                                     <source src="/uploads/videos/<?= rawurlencode($vid['filename']) ?>">
                                     Your browser does not support the video tag.
                                 </video>
+                                <!-- FIX: use created_at not uploaded_at -->
                                 <div style="font-size:0.8rem; color:var(--muted);">
                                     Uploaded by <?= htmlspecialchars($vid['uploader_name']) ?>
-                                    · <?= date('M j, g:i A', strtotime($vid['uploaded_at'])) ?>
+                                    · <?= date('M j, g:i A', strtotime($vid['created_at'])) ?>
                                 </div>
                             </div>
                         <?php endwhile; ?>
@@ -287,15 +298,9 @@ require_once '../includes/header.php';
                     <label style="font-weight:600; font-size:0.85rem; display:block; margin-bottom:0.5rem;">
                         Upload Video
                     </label>
-                    <input
-                        type="file"
-                        id="videoFile"
-                        accept="video/*"
-                        style="font-size:0.9rem; margin-bottom:0.5rem;"
-                    >
-                    <button type="button" onclick="uploadVideo()" class="btn btn-primary btn-sm">
-                        Upload
-                    </button>
+                    <input type="file" id="videoFile" accept="video/*"
+                           style="font-size:0.9rem; margin-bottom:0.5rem;">
+                    <button type="button" onclick="uploadVideo()" class="btn btn-primary btn-sm">Upload</button>
                     <div id="uploadStatus" style="font-size:0.85rem; margin-top:0.5rem;"></div>
                 </div>
 
@@ -311,31 +316,14 @@ require_once '../includes/header.php';
                             ⏹ Stop
                         </button>
                     </div>
-
-                    <video
-                        id="livePreview"
-                        autoplay
-                        muted
-                        playsinline
-                        style="width:100%; border-radius:var(--radius); display:none; background:#000;"
-                    ></video>
-
-                    <video
-                        id="recordedPreview"
-                        controls
-                        style="width:100%; border-radius:var(--radius); display:none; margin-top:0.5rem;"
-                    ></video>
-
-                    <button
-                        type="button"
-                        onclick="uploadRecorded()"
-                        id="uploadRecordedBtn"
-                        class="btn btn-primary btn-sm"
-                        style="display:none; margin-top:0.5rem;"
-                    >
+                    <video id="livePreview" autoplay muted playsinline
+                           style="width:100%; border-radius:var(--radius); display:none; background:#000;"></video>
+                    <video id="recordedPreview" controls
+                           style="width:100%; border-radius:var(--radius); display:none; margin-top:0.5rem;"></video>
+                    <button type="button" onclick="uploadRecorded()" id="uploadRecordedBtn"
+                            class="btn btn-primary btn-sm" style="display:none; margin-top:0.5rem;">
                         ⬆️ Upload Recording
                     </button>
-
                     <div id="recordStatus" style="font-size:0.85rem; margin-top:0.5rem;"></div>
                 </div>
             </div>
@@ -348,16 +336,10 @@ require_once '../includes/header.php';
                 <h2>🤖 TekBot AI Assistant</h2>
                 <span style="font-size:0.78rem; color:var(--muted);">Powered by Claude</span>
             </div>
-
             <div id="chatMessages" class="chat-messages"></div>
-
             <div class="chat-input-area">
-                <textarea
-                    id="chatInput"
-                    placeholder="Ask TekBot anything about this issue..."
-                    rows="2"
-                    onkeydown="handleChatKey(event)"
-                ></textarea>
+                <textarea id="chatInput" placeholder="Ask TekBot anything about this issue..."
+                          rows="2" onkeydown="handleChatKey(event)"></textarea>
                 <button type="button" onclick="sendChat()" class="btn btn-primary btn-sm" id="sendBtn">Send</button>
             </div>
         </div>
@@ -367,43 +349,27 @@ require_once '../includes/header.php';
                 <div class="card-header">
                     <h2>Close Request</h2>
                 </div>
-
                 <div style="padding:1.25rem;">
                     <form method="POST" action="">
                         <div class="form-group">
                             <label>
-                                What was tried / What happened
+                                Resolution Note
                                 <span style="color:var(--danger)">*</span>
                             </label>
-                            <textarea
-                                name="resolution_note"
-                                rows="4"
-                                placeholder="Describe what you tried and what happened..."
-                                required
-                            ></textarea>
+                            <textarea name="resolution_note" rows="4"
+                                placeholder="Describe what you tried and what resolved the issue..."
+                                required></textarea>
                         </div>
-
-                        <div class="form-group">
-                            <label>Tags (comma separated)</label>
-                            <input
-                                type="text"
-                                name="tags"
-                                placeholder="e.g. hvac, electrical, loto"
-                            >
-                        </div>
-
                         <div style="display:flex; gap:1rem; flex-wrap:wrap;">
                             <button type="submit" name="resolve" value="1" class="btn btn-primary">
                                 ✅ Mark Resolved — Save to Knowledge Base
                             </button>
-
                             <button type="submit" name="escalate" value="1" class="btn btn-escalate">
                                 ⚠️ Escalate — Could Not Resolve
                             </button>
                         </div>
-
                         <p style="font-size:0.8rem; color:var(--muted); margin-top:0.75rem;">
-                            ⚠️ Escalated requests are logged for supervisors but <strong>not</strong> saved to the knowledge base.
+                            ⚠️ Escalated requests are logged for supervisors but marked separately in the knowledge base.
                         </p>
                     </form>
                 </div>
@@ -416,14 +382,8 @@ require_once '../includes/header.php';
 const REQUEST_ID = <?= (int)$request_id ?>;
 const CONTEXT = <?= json_encode(($request['title'] ?? '') . ': ' . ($request['description'] ?? '')) ?>;
 
-// ---------------------
-// AI Chat
-// ---------------------
 function handleChatKey(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendChat();
-    }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
 }
 
 function appendMessage(role, text) {
@@ -437,52 +397,32 @@ function appendMessage(role, text) {
 
 async function sendChat() {
     const input = document.getElementById('chatInput');
-    const btn = document.getElementById('sendBtn');
-    const msg = input.value.trim();
-
+    const btn   = document.getElementById('sendBtn');
+    const msg   = input.value.trim();
     if (!msg) return;
 
     input.value = '';
     appendMessage('user', msg);
-
     btn.disabled = true;
     btn.textContent = '...';
-
     appendMessage('ai', '<em>TekBot is thinking...</em>');
 
     try {
-        const res = await fetch('/api/ai_chat.php', {
+        const res  = await fetch('/api/ai_chat.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                message: msg,
-                context: CONTEXT,
-                request_id: REQUEST_ID
-            })
+            body: JSON.stringify({ message: msg, context: CONTEXT, request_id: REQUEST_ID })
         });
-
         let data = {};
-        try {
-            data = await res.json();
-        } catch (jsonErr) {
-            data = {};
-        }
+        try { data = await res.json(); } catch(e) {}
 
         const msgs = document.querySelectorAll('.chat-msg-ai');
-        if (msgs.length > 0) {
-            msgs[msgs.length - 1].remove();
-        }
+        if (msgs.length > 0) msgs[msgs.length - 1].remove();
 
-        if (data.reply) {
-            appendMessage('ai', data.reply);
-        } else {
-            appendMessage('ai', '⚠️ ' + (data.error || 'Error getting response.'));
-        }
-    } catch (e) {
+        appendMessage('ai', data.reply || ('⚠️ ' + (data.error || 'Error getting response.')));
+    } catch(e) {
         const msgs = document.querySelectorAll('.chat-msg-ai');
-        if (msgs.length > 0) {
-            msgs[msgs.length - 1].remove();
-        }
+        if (msgs.length > 0) msgs[msgs.length - 1].remove();
         appendMessage('ai', '⚠️ Network error. Please try again.');
     } finally {
         btn.disabled = false;
@@ -491,179 +431,84 @@ async function sendChat() {
 }
 
 window.addEventListener('load', () => {
-    appendMessage(
-        'ai',
-        '👋 Hi! I\\'m TekBot. I\\'m here to help with: <strong>' +
+    appendMessage('ai', '👋 Hi! I\'m TekBot. I\'m here to help with: <strong>' +
         <?= json_encode(htmlspecialchars($request['title'] ?? '')) ?> +
-        '</strong>. Ask me anything about this issue!'
-    );
+        '</strong>. Ask me anything about this issue!');
 });
 
-// ---------------------
-// Video Upload
-// ---------------------
 async function uploadVideo() {
     const fileInput = document.getElementById('videoFile');
     const file = fileInput.files[0];
     const status = document.getElementById('uploadStatus');
-
-    if (!file) {
-        status.style.color = 'var(--danger)';
-        status.textContent = 'Please select a video file.';
-        return;
-    }
-
-    status.style.color = 'inherit';
-    status.textContent = 'Uploading...';
-
+    if (!file) { status.style.color='var(--danger)'; status.textContent='Please select a video file.'; return; }
+    status.style.color='inherit'; status.textContent='Uploading...';
     const fd = new FormData();
     fd.append('video', file);
     fd.append('request_id', REQUEST_ID);
-
     try {
-        const res = await fetch('/api/upload_video.php', {
-            method: 'POST',
-            body: fd
-        });
-
+        const res  = await fetch('/api/upload_video.php', { method:'POST', body:fd });
         const data = await res.json();
-
-        if (data.success) {
-            status.style.color = 'var(--success)';
-            status.textContent = '✅ Uploaded successfully. Refresh to view.';
-            fileInput.value = '';
-        } else {
-            status.style.color = 'var(--danger)';
-            status.textContent = '❌ ' + (data.error || 'Upload failed.');
-        }
-    } catch (e) {
-        status.style.color = 'var(--danger)';
-        status.textContent = '❌ Upload failed due to a network error.';
-    }
+        if (data.success) { status.style.color='var(--success)'; status.textContent='✅ Uploaded successfully. Refresh to view.'; fileInput.value=''; }
+        else { status.style.color='var(--danger)'; status.textContent='❌ ' + (data.error || 'Upload failed.'); }
+    } catch(e) { status.style.color='var(--danger)'; status.textContent='❌ Upload failed due to a network error.'; }
 }
 
-// ---------------------
-// Video Recording
-// ---------------------
-let mediaRecorder = null;
-let recordedChunks = [];
-let stream = null;
+let mediaRecorder=null, recordedChunks=[], stream=null;
 
 async function startRecording() {
-    const livePreview = document.getElementById('livePreview');
-    const recordBtn = document.getElementById('recordBtn');
-    const stopBtn = document.getElementById('stopBtn');
-    const status = document.getElementById('recordStatus');
-
+    const livePreview=document.getElementById('livePreview');
+    const recordBtn=document.getElementById('recordBtn');
+    const stopBtn=document.getElementById('stopBtn');
+    const status=document.getElementById('recordStatus');
     try {
-        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        livePreview.srcObject = stream;
-        livePreview.style.display = 'block';
-
-        recordedChunks = [];
-        mediaRecorder = new MediaRecorder(stream);
-
-        mediaRecorder.ondataavailable = function (e) {
-            if (e.data && e.data.size > 0) {
-                recordedChunks.push(e.data);
-            }
-        };
-
-        mediaRecorder.onstop = showRecordedPreview;
-        mediaRecorder.start();
-
-        recordBtn.disabled = true;
-        stopBtn.disabled = false;
-        status.style.color = 'inherit';
-        status.textContent = '🔴 Recording...';
-    } catch (e) {
-        status.style.color = 'var(--danger)';
-        status.textContent = '❌ Camera or microphone access denied.';
-    }
+        stream = await navigator.mediaDevices.getUserMedia({video:true,audio:true});
+        livePreview.srcObject=stream; livePreview.style.display='block';
+        recordedChunks=[]; mediaRecorder=new MediaRecorder(stream);
+        mediaRecorder.ondataavailable=e=>{ if(e.data&&e.data.size>0) recordedChunks.push(e.data); };
+        mediaRecorder.onstop=showRecordedPreview; mediaRecorder.start();
+        recordBtn.disabled=true; stopBtn.disabled=false;
+        status.style.color='inherit'; status.textContent='🔴 Recording...';
+    } catch(e) { status.style.color='var(--danger)'; status.textContent='❌ Camera or microphone access denied.'; }
 }
 
 function stopRecording() {
-    const livePreview = document.getElementById('livePreview');
-    const recordBtn = document.getElementById('recordBtn');
-    const stopBtn = document.getElementById('stopBtn');
-    const status = document.getElementById('recordStatus');
-
-    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-        mediaRecorder.stop();
-    }
-
-    if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-    }
-
-    livePreview.style.display = 'none';
-    livePreview.srcObject = null;
-
-    recordBtn.disabled = false;
-    stopBtn.disabled = true;
-    status.style.color = 'inherit';
-    status.textContent = 'Recording complete.';
+    if (mediaRecorder&&mediaRecorder.state!=='inactive') mediaRecorder.stop();
+    if (stream) stream.getTracks().forEach(t=>t.stop());
+    document.getElementById('livePreview').style.display='none';
+    document.getElementById('livePreview').srcObject=null;
+    document.getElementById('recordBtn').disabled=false;
+    document.getElementById('stopBtn').disabled=true;
+    document.getElementById('recordStatus').textContent='Recording complete.';
 }
 
 function showRecordedPreview() {
     if (!recordedChunks.length) return;
-
-    const blob = new Blob(recordedChunks, { type: 'video/webm' });
-    const url = URL.createObjectURL(blob);
-
-    const preview = document.getElementById('recordedPreview');
-    preview.src = url;
-    preview.style.display = 'block';
-
-    document.getElementById('uploadRecordedBtn').style.display = 'inline-block';
+    const blob=new Blob(recordedChunks,{type:'video/webm'});
+    const url=URL.createObjectURL(blob);
+    const preview=document.getElementById('recordedPreview');
+    preview.src=url; preview.style.display='block';
+    document.getElementById('uploadRecordedBtn').style.display='inline-block';
 }
 
 async function uploadRecorded() {
-    const btn = document.getElementById('uploadRecordedBtn');
-    const status = document.getElementById('recordStatus');
-
-    if (!recordedChunks.length) {
-        status.style.color = 'var(--danger)';
-        status.textContent = '❌ No recording available to upload.';
-        return;
-    }
-
-    btn.disabled = true;
-    status.style.color = 'inherit';
-    status.textContent = 'Uploading recording...';
-
-    const blob = new Blob(recordedChunks, { type: 'video/webm' });
-    const fd = new FormData();
-    fd.append('video', blob, 'recording_' + Date.now() + '.webm');
-    fd.append('request_id', REQUEST_ID);
-
+    const btn=document.getElementById('uploadRecordedBtn');
+    const status=document.getElementById('recordStatus');
+    if (!recordedChunks.length) { status.style.color='var(--danger)'; status.textContent='❌ No recording available.'; return; }
+    btn.disabled=true; status.style.color='inherit'; status.textContent='Uploading recording...';
+    const blob=new Blob(recordedChunks,{type:'video/webm'});
+    const fd=new FormData();
+    fd.append('video',blob,'recording_'+Date.now()+'.webm');
+    fd.append('request_id',REQUEST_ID);
     try {
-        const res = await fetch('/api/upload_video.php', {
-            method: 'POST',
-            body: fd
-        });
-
-        const data = await res.json();
-
-        if (data.success) {
-            status.style.color = 'var(--success)';
-            status.textContent = '✅ Recording uploaded successfully. Refresh to view.';
-        } else {
-            status.style.color = 'var(--danger)';
-            status.textContent = '❌ ' + (data.error || 'Upload failed.');
-            btn.disabled = false;
-        }
-    } catch (e) {
-        status.style.color = 'var(--danger)';
-        status.textContent = '❌ Upload failed due to a network error.';
-        btn.disabled = false;
-    }
+        const res=await fetch('/api/upload_video.php',{method:'POST',body:fd});
+        const data=await res.json();
+        if (data.success) { status.style.color='var(--success)'; status.textContent='✅ Recording uploaded. Refresh to view.'; }
+        else { status.style.color='var(--danger)'; status.textContent='❌ '+(data.error||'Upload failed.'); btn.disabled=false; }
+    } catch(e) { status.style.color='var(--danger)'; status.textContent='❌ Network error.'; btn.disabled=false; }
 }
 </script>
 
 <?php
-if ($stmt_videos) {
-    mysqli_stmt_close($stmt_videos);
-}
+if ($stmt_videos) mysqli_stmt_close($stmt_videos);
 require_once '../includes/footer.php';
 ?>
