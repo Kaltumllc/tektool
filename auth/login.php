@@ -2,8 +2,8 @@
 require_once '../config/db.php';
 require_once '../includes/auth_guard.php';
 
-// Initialize $email early so it's always defined
-$email = ''; 
+// Initialize variables
+$email = '';
 $error = '';
 
 if (is_logged_in()) {
@@ -19,32 +19,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Email and password are required.';
     } else {
         $stmt = mysqli_prepare($conn, "SELECT id, full_name, password, role FROM users WHERE email = ?");
-        mysqli_stmt_bind_param($stmt, 's', $email);
-        mysqli_stmt_execute($stmt);
-        $result = mysqli_stmt_get_result($stmt);
-        $user   = mysqli_fetch_assoc($result);
 
-        if ($user && password_verify($password, $user['password'])) {
-            $_SESSION['user_id']   = $user['id'];
-            $_SESSION['full_name'] = $user['full_name'];
-            $_SESSION['role']      = $user['role'];
+        if ($stmt) {
+            mysqli_stmt_bind_param($stmt, 's', $email);
+            mysqli_stmt_execute($stmt);
+            $result = mysqli_stmt_get_result($stmt);
+            $user   = mysqli_fetch_assoc($result);
 
-            // Audit log
-            $action = "Login: {$user['role']} #{$user['id']}";
-            $stmt2  = mysqli_prepare($conn, "INSERT INTO audit_log (user_id, action) VALUES (?, ?)");
-            mysqli_stmt_bind_param($stmt2, 'is', $user['id'], $action);
-            mysqli_stmt_execute($stmt2);
+            if ($user && password_verify($password, $user['password'])) {
+                $_SESSION['user_id']   = $user['id'];
+                $_SESSION['full_name'] = $user['full_name'];
+                $_SESSION['role']      = $user['role'];
 
-            // Role-based redirect
-            switch ($user['role']) {
-                case 'junior': header('Location: /junior/dashboard.php'); break;
-                case 'senior': header('Location: /senior/dashboard.php'); break;
-                case 'admin':  header('Location: /admin/dashboard.php');  break;
-                default:       header('Location: /index.php'); break;
+                // Audit log
+                $action = "Login: {$user['role']} #{$user['id']}";
+                $stmt2  = mysqli_prepare($conn, "INSERT INTO audit_log (user_id, action) VALUES (?, ?)");
+
+                if ($stmt2) {
+                    mysqli_stmt_bind_param($stmt2, 'is', $user['id'], $action);
+                    mysqli_stmt_execute($stmt2);
+                }
+
+                // Role-based redirect
+                switch ($user['role']) {
+                    case 'junior':
+                        header('Location: /junior/dashboard.php');
+                        break;
+
+                    case 'senior':
+                        header('Location: /senior/dashboard.php');
+                        break;
+
+                    case 'admin':
+                        header('Location: /admin/dashboard.php');
+                        break;
+
+                    default:
+                        header('Location: /index.php');
+                        break;
+                }
+
+                exit();
+            } else {
+                $error = 'Invalid email or password.';
             }
-            exit();
         } else {
-            $error = 'Invalid email or password.';
+            $error = 'Login system error. Please try again later.';
         }
     }
 }
@@ -53,32 +73,127 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login — TekTool</title>
-    <link rel="stylesheet" href="/assets/css/style.css">
+
+    <title>Sign In — TekTool</title>
+
+    <!-- Cache-busting version added so browser loads latest CSS -->
+    <link rel="stylesheet" href="/assets/css/style.css?v=20260505">
 </head>
+
 <body class="auth-page">
-    <div class="auth-card">
-        <div class="auth-logo">⚙️ TekTool</div>
-        <h2>Welcome Back</h2>
 
-        <?php if ($error): ?>
-            <div class="alert alert-error"><?= htmlspecialchars($error) ?></div>
-        <?php endif; ?>
+    <main class="auth-shell">
 
-        <form method="POST" action="">
-            <div class="form-group">
-                <label>Email Address</label>
-                <input type="email" name="email" placeholder="you@company.com"
-                       value="<?= htmlspecialchars($email ?? '') ?>" required>
+        <!-- Left Brand Panel -->
+        <section class="auth-left">
+            <a href="/" class="auth-brand">
+                <span class="brand-icon">⚙️</span>
+                <span>TekTool</span>
+            </a>
+
+            <div class="auth-copy">
+                <div class="hero-badge">
+                    Field Tech Support Platform
+                </div>
+
+                <h1>
+                    Expert help for field technicians — faster.
+                </h1>
+
+                <p>
+                    Sign in to submit support requests, connect with available lead techs,
+                    track resolutions, and build reusable knowledge from every field issue.
+                </p>
+
+                <div class="auth-highlights">
+                    <div>
+                        <strong>Real-time support</strong>
+                        <span>Connect junior technicians with senior support quickly.</span>
+                    </div>
+
+                    <div>
+                        <strong>Resolution tracking</strong>
+                        <span>Log every fix, escalation, and technician action.</span>
+                    </div>
+
+                    <div>
+                        <strong>Secure role access</strong>
+                        <span>Separate dashboards for junior, senior, and admin users.</span>
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <label>Password</label>
-                <input type="password" name="password" placeholder="Your password" required>
+        </section>
+
+        <!-- Right Login Panel -->
+        <section class="auth-right">
+            <div class="auth-card">
+
+                <div class="auth-card-header">
+                    <div class="auth-logo-mobile">
+                        ⚙️ TekTool
+                    </div>
+
+                    <h2>Welcome Back</h2>
+
+                    <p>
+                        Sign in to continue to your TekTool dashboard.
+                    </p>
+                </div>
+
+                <?php if (!empty($error)): ?>
+                    <div class="auth-alert">
+                        <?= htmlspecialchars($error) ?>
+                    </div>
+                <?php endif; ?>
+
+                <form method="POST" action="" class="auth-form">
+
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+
+                        <input 
+                            type="email"
+                            id="email"
+                            name="email"
+                            placeholder="you@company.com"
+                            value="<?= htmlspecialchars($email ?? '') ?>"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+
+                        <input 
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Enter your password"
+                            required
+                        >
+                    </div>
+
+                    <button type="submit" class="auth-submit">
+                        Sign In
+                    </button>
+
+                </form>
+
+                <p class="auth-switch">
+                    No account yet?
+                    <a href="/auth/register.php">Create an account</a>
+                </p>
+
+                <a href="/" class="back-home">
+                    ← Back to home
+                </a>
+
             </div>
-            <button type="submit" class="btn btn-primary btn-full">Sign In</button>
-        </form>
-        <p class="auth-footer">No account yet? <a href="register.php">Register here</a></p>
-    </div>
+        </section>
+
+    </main>
+
 </body>
 </html>

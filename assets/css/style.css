@@ -1,12 +1,11 @@
 /* =========================================================
-   TekTool.app — Premium Enterprise Landing Page Design
-   Built for C&W Services Field Technicians
+   TekTool.app — Premium Enterprise Design System
+   Built for Field Technician Support Workflows
    ========================================================= */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 :root {
-    /* Brand System */
     --primary: #0b5cff;
     --primary-dark: #003b95;
     --primary-soft: #eaf1ff;
@@ -23,10 +22,13 @@
     --cyan: #06b6d4;
     --red: #ef4444;
 
+    --slate-950: #020617;
     --slate-900: #0f172a;
+    --slate-800: #1e293b;
     --slate-700: #334155;
     --slate-600: #475569;
     --slate-500: #64748b;
+    --slate-300: #cbd5e1;
     --slate-200: #e2e8f0;
     --slate-100: #f1f5f9;
     --slate-50: #f8fafc;
@@ -36,6 +38,7 @@
     --radius-sm: 10px;
     --radius-md: 16px;
     --radius-lg: 24px;
+    --radius-xl: 28px;
 
     --shadow-sm: 0 4px 12px rgba(15, 23, 42, 0.08);
     --shadow-md: 0 14px 34px rgba(15, 23, 42, 0.14);
@@ -44,7 +47,10 @@
     --max-width: 1200px;
 }
 
-/* Reset */
+/* =========================================================
+   Global Reset
+   ========================================================= */
+
 * {
     box-sizing: border-box;
     -webkit-font-smoothing: antialiased;
@@ -65,6 +71,80 @@ body {
 
 a {
     color: inherit;
+}
+
+/* =========================================================
+   General Buttons
+   ========================================================= */
+
+.btn,
+.btn-primary,
+.btn-secondary,
+.nav-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 0 18px;
+    border-radius: 999px;
+    font-weight: 800;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    font-family: inherit;
+}
+
+.btn-primary,
+.nav-btn {
+    color: white;
+    background: linear-gradient(135deg, var(--orange), var(--orange-dark));
+    box-shadow: 0 12px 26px rgba(249, 115, 22, 0.32);
+}
+
+.btn-primary:hover,
+.nav-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 36px rgba(249, 115, 22, 0.42);
+}
+
+.btn-secondary {
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.18);
+    transform: translateY(-2px);
+}
+
+.btn-outline {
+    color: var(--primary);
+    border: 1px solid var(--slate-300);
+    background: white;
+}
+
+.btn-outline:hover {
+    border-color: var(--primary);
+    background: var(--primary-soft);
+}
+
+.btn-sm {
+    min-height: 38px;
+    padding: 0 14px;
+    font-size: 0.9rem;
+}
+
+.btn-lg {
+    min-height: 52px;
+    padding: 0 24px;
+    font-size: 1rem;
+}
+
+.btn-full {
+    width: 100%;
 }
 
 /* =========================================================
@@ -91,12 +171,13 @@ a {
 
 .logo,
 .brand,
+.nav-brand,
 .landing-logo {
     display: inline-flex;
     align-items: center;
     gap: 10px;
     color: var(--navy-950);
-    font-weight: 800;
+    font-weight: 900;
     font-size: 1.1rem;
     text-decoration: none;
     letter-spacing: -0.02em;
@@ -131,47 +212,8 @@ a {
     color: var(--primary);
 }
 
-.nav-btn,
-.btn-primary,
-.btn-secondary {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    min-height: 44px;
-    padding: 0 18px;
-    border-radius: 999px;
-    font-weight: 800;
-    text-decoration: none;
-    transition: all 0.25s ease;
-}
-
-.nav-btn,
-.btn-primary {
-    color: white;
-    background: linear-gradient(135deg, var(--orange), var(--orange-dark));
-    box-shadow: 0 12px 26px rgba(249, 115, 22, 0.32);
-}
-
-.nav-btn:hover,
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 18px 36px rgba(249, 115, 22, 0.42);
-}
-
-.btn-secondary {
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    background: rgba(255, 255, 255, 0.1);
-}
-
-.btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.18);
-    transform: translateY(-2px);
-}
-
 /* =========================================================
-   Hero Section
+   Landing Hero
    ========================================================= */
 
 .hero {
@@ -251,6 +293,7 @@ a {
 }
 
 .hero-subtitle,
+.hero-sub,
 .hero p {
     max-width: 760px;
     margin: 0 auto 32px;
@@ -259,7 +302,8 @@ a {
     font-weight: 500;
 }
 
-.hero-actions {
+.hero-actions,
+.hero-cta {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -268,44 +312,18 @@ a {
     margin-top: 30px;
 }
 
-/* Fix plain hero links if your HTML currently uses basic anchors */
 .hero a {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 48px;
-    padding: 0 22px;
-    margin: 5px;
-    border-radius: 999px;
-    font-weight: 800;
     text-decoration: none;
-    color: white;
-    transition: all 0.25s ease;
-}
-
-.hero a:first-of-type {
-    background: linear-gradient(135deg, var(--orange), var(--orange-dark));
-    box-shadow: 0 16px 34px rgba(249, 115, 22, 0.35);
-}
-
-.hero a:last-of-type {
-    background: rgba(255, 255, 255, 0.11);
-    border: 1px solid rgba(255, 255, 255, 0.24);
-}
-
-.hero a:hover {
-    transform: translateY(-2px);
 }
 
 /* =========================================================
-   Features Section
+   Features
    ========================================================= */
 
 .features {
     position: relative;
     padding: 92px 24px;
-    background:
-        linear-gradient(180deg, var(--slate-50), #ffffff);
+    background: linear-gradient(180deg, var(--slate-50), #ffffff);
 }
 
 .features-inner {
@@ -433,12 +451,6 @@ a {
     font-size: 1rem;
 }
 
-/* If you are still using emojis directly inside cards */
-.feature-card > div:first-child,
-.feature-card > span:first-child {
-    font-size: 1.8rem;
-}
-
 /* =========================================================
    How It Works
    ========================================================= */
@@ -498,7 +510,7 @@ a {
 }
 
 /* =========================================================
-   Optional CTA Section
+   CTA Section
    ========================================================= */
 
 .cta-section {
@@ -576,6 +588,276 @@ a {
 }
 
 /* =========================================================
+   Authentication Pages
+   ========================================================= */
+
+.auth-page {
+    min-height: 100vh;
+    margin: 0;
+    background:
+        radial-gradient(circle at 15% 20%, rgba(6, 182, 212, 0.18), transparent 30%),
+        radial-gradient(circle at 90% 10%, rgba(255, 159, 28, 0.18), transparent 28%),
+        linear-gradient(135deg, #06172f 0%, #08224a 45%, #0b5cff 100%);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #0f172a;
+}
+
+.auth-shell {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+}
+
+.auth-left {
+    position: relative;
+    padding: 48px 64px;
+    color: white;
+    overflow: hidden;
+}
+
+.auth-left::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: linear-gradient(to bottom, black, transparent 85%);
+    pointer-events: none;
+}
+
+.auth-brand {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    color: white;
+    text-decoration: none;
+    font-size: 1.2rem;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+}
+
+.auth-copy {
+    position: relative;
+    z-index: 1;
+    max-width: 620px;
+    margin-top: 110px;
+}
+
+.auth-copy h1 {
+    margin: 24px 0 20px;
+    font-size: clamp(2.8rem, 5vw, 5.1rem);
+    line-height: 0.98;
+    letter-spacing: -0.07em;
+    font-weight: 900;
+}
+
+.auth-copy p {
+    max-width: 560px;
+    color: #dbeafe;
+    font-size: 1.12rem;
+    line-height: 1.7;
+}
+
+.auth-highlights {
+    display: grid;
+    gap: 16px;
+    margin-top: 36px;
+    max-width: 540px;
+}
+
+.auth-highlights div {
+    padding: 18px 20px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(14px);
+}
+
+.auth-highlights strong {
+    display: block;
+    color: white;
+    font-size: 0.98rem;
+    margin-bottom: 4px;
+}
+
+.auth-highlights span {
+    color: #dbeafe;
+    font-size: 0.92rem;
+}
+
+.auth-right {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 28px;
+    background: rgba(248, 250, 252, 0.9);
+    backdrop-filter: blur(20px);
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 460px;
+    padding: 42px;
+    border-radius: 28px;
+    background: white;
+    border: 1px solid rgba(226, 232, 240, 0.95);
+    box-shadow: 0 30px 90px rgba(2, 8, 23, 0.25);
+}
+
+.auth-card-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.auth-logo-mobile {
+    display: none;
+    margin-bottom: 18px;
+    color: #06172f;
+    font-weight: 900;
+}
+
+.auth-card-header h2 {
+    margin: 0 0 10px;
+    color: #06172f;
+    font-size: 2rem;
+    line-height: 1.1;
+    font-weight: 900;
+    letter-spacing: -0.045em;
+}
+
+.auth-card-header p {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.98rem;
+}
+
+.auth-alert {
+    margin-bottom: 20px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    color: #991b1b;
+    background: #fee2e2;
+    border: 1px solid #fecaca;
+    font-weight: 700;
+    font-size: 0.92rem;
+}
+
+.alert {
+    padding: 14px 16px;
+    border-radius: 14px;
+    font-weight: 700;
+}
+
+.alert-error {
+    color: #991b1b;
+    background: #fee2e2;
+    border: 1px solid #fecaca;
+}
+
+.auth-form {
+    display: grid;
+    gap: 18px;
+}
+
+.form-group {
+    display: grid;
+    gap: 8px;
+}
+
+.form-group label {
+    color: #0f172a;
+    font-size: 0.9rem;
+    font-weight: 800;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    min-height: 52px;
+    padding: 0 16px;
+    border-radius: 16px;
+    border: 1px solid #cbd5e1;
+    background: #f8fafc;
+    color: #0f172a;
+    font-size: 1rem;
+    font-family: inherit;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.form-group textarea {
+    padding-top: 14px;
+    min-height: 120px;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: #0b5cff;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(11, 92, 255, 0.12);
+}
+
+.auth-submit {
+    min-height: 54px;
+    margin-top: 8px;
+    border: 0;
+    border-radius: 999px;
+    color: white;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 900;
+    font-family: inherit;
+    background: linear-gradient(135deg, #ff9f1c, #f97316);
+    box-shadow: 0 16px 34px rgba(249, 115, 22, 0.35);
+    transition: all 0.25s ease;
+}
+
+.auth-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 22px 44px rgba(249, 115, 22, 0.45);
+}
+
+.auth-switch,
+.auth-footer {
+    margin: 24px 0 0;
+    text-align: center;
+    color: #64748b;
+    font-size: 0.95rem;
+}
+
+.auth-switch a,
+.auth-footer a {
+    color: #0b5cff;
+    font-weight: 900;
+    text-decoration: none;
+}
+
+.auth-switch a:hover,
+.auth-footer a:hover {
+    text-decoration: underline;
+}
+
+.back-home {
+    display: block;
+    margin-top: 18px;
+    text-align: center;
+    color: #475569;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.back-home:hover {
+    color: #0b5cff;
+}
+
+/* =========================================================
    Responsive Design
    ========================================================= */
 
@@ -591,6 +873,34 @@ a {
 
     .step-arrow {
         display: none;
+    }
+}
+
+@media (max-width: 900px) {
+    .auth-shell {
+        grid-template-columns: 1fr;
+    }
+
+    .auth-left {
+        display: none;
+    }
+
+    .auth-right {
+        min-height: 100vh;
+        padding: 28px 18px 42px;
+        background:
+            radial-gradient(circle at 15% 20%, rgba(6, 182, 212, 0.18), transparent 30%),
+            radial-gradient(circle at 90% 10%, rgba(255, 159, 28, 0.18), transparent 28%),
+            linear-gradient(135deg, #06172f 0%, #08224a 45%, #0b5cff 100%);
+    }
+
+    .auth-card {
+        padding: 32px 24px;
+        border-radius: 24px;
+    }
+
+    .auth-logo-mobile {
+        display: block;
     }
 }
 
@@ -632,5 +942,10 @@ a {
     .feature-card {
         padding: 28px;
         min-height: auto;
+    }
+
+    .legal-row {
+        flex-direction: column;
+        gap: 6px;
     }
 }
