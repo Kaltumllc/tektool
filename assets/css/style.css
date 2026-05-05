@@ -588,7 +588,7 @@ a {
 }
 
 /* =========================================================
-   Authentication Pages
+   Authentication Pages — Login + Shared Auth Styles
    ========================================================= */
 
 .auth-page {
@@ -746,6 +746,23 @@ a {
     font-size: 0.92rem;
 }
 
+.auth-success {
+    margin-bottom: 20px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    color: #166534;
+    background: #dcfce7;
+    border: 1px solid #bbf7d0;
+    font-weight: 700;
+    font-size: 0.92rem;
+}
+
+.auth-success a {
+    color: #14532d;
+    font-weight: 900;
+    text-decoration: underline;
+}
+
 .alert {
     padding: 14px 16px;
     border-radius: 14px;
@@ -756,6 +773,12 @@ a {
     color: #991b1b;
     background: #fee2e2;
     border: 1px solid #fecaca;
+}
+
+.alert-success {
+    color: #166534;
+    background: #dcfce7;
+    border: 1px solid #bbf7d0;
 }
 
 .auth-form {
@@ -858,8 +881,264 @@ a {
 }
 
 /* =========================================================
+   Register Page — Centered Premium Layout
+   ========================================================= */
+
+body.auth-page.auth-page-centered {
+    min-height: 100vh;
+    width: 100%;
+    overflow-x: hidden;
+    background:
+        radial-gradient(circle at 18% 18%, rgba(6, 182, 212, 0.22), transparent 28%),
+        radial-gradient(circle at 82% 14%, rgba(255, 159, 28, 0.16), transparent 26%),
+        radial-gradient(circle at 70% 86%, rgba(139, 92, 246, 0.16), transparent 30%),
+        linear-gradient(135deg, #06172f 0%, #08224a 42%, #0b5cff 100%);
+}
+
+.auth-center-shell {
+    width: 100%;
+    min-height: 100vh;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 48px 24px;
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+}
+
+.auth-center-shell::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background:
+        linear-gradient(115deg, rgba(255,255,255,0.08), transparent 32%),
+        linear-gradient(295deg, rgba(255,255,255,0.06), transparent 35%);
+    pointer-events: none;
+}
+
+/* Decorative glowing orbs */
+.auth-bg-orb {
+    position: absolute;
+    border-radius: 999px;
+    filter: blur(80px);
+    opacity: 0.55;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.auth-bg-orb-1 {
+    width: 360px;
+    height: 360px;
+    top: -80px;
+    left: -80px;
+    background: rgba(6, 182, 212, 0.32);
+}
+
+.auth-bg-orb-2 {
+    width: 460px;
+    height: 460px;
+    right: -140px;
+    bottom: -140px;
+    background: rgba(255, 159, 28, 0.24);
+}
+
+/* Technical grid background */
+.auth-bg-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: linear-gradient(to bottom, black, transparent 92%);
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.95;
+}
+
+/* Centered register card */
+.auth-card.register-card {
+    position: relative;
+    z-index: 10;
+    width: min(100%, 520px);
+    max-width: 520px;
+    margin: 0 auto !important;
+    padding: 36px;
+    border-radius: 32px;
+    background:
+        linear-gradient(180deg, rgba(255,255,255,0.99), rgba(248,250,252,0.97));
+    border: 1px solid rgba(255, 255, 255, 0.75);
+    box-shadow:
+        0 40px 110px rgba(2, 8, 23, 0.38),
+        0 18px 38px rgba(2, 8, 23, 0.18),
+        inset 0 1px 0 rgba(255,255,255,0.9);
+    backdrop-filter: blur(18px);
+}
+
+/* Register card header */
+.register-card .auth-card-header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.register-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: center;
+    text-decoration: none;
+    color: #06172f;
+    font-weight: 900;
+    font-size: 1.08rem;
+    margin: 0 auto 18px;
+}
+
+.register-card .auth-card-header h2 {
+    margin: 0 0 8px;
+    color: #06172f;
+    font-size: 2.15rem;
+    line-height: 1.05;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+}
+
+.register-card .auth-card-header p {
+    max-width: 390px;
+    margin: 0 auto;
+    color: #64748b;
+    font-size: 0.98rem;
+    line-height: 1.6;
+}
+
+/* Register form spacing */
+.register-card .auth-form {
+    gap: 14px;
+}
+
+.register-card .form-group {
+    gap: 7px;
+}
+
+.register-card .form-group label {
+    font-size: 0.86rem;
+}
+
+.register-card .form-group input,
+.register-card .form-group select {
+    min-height: 52px;
+    border-radius: 16px;
+    background: #f8fafc;
+}
+
+.register-card .auth-submit {
+    width: 100%;
+    min-height: 54px;
+    margin-top: 8px;
+}
+
+/* Floating background tool cards */
+.tool-float {
+    position: absolute;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 240px;
+    padding: 16px 18px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.13);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    backdrop-filter: blur(16px);
+    box-shadow:
+        0 24px 60px rgba(2, 8, 23, 0.24),
+        inset 0 1px 0 rgba(255,255,255,0.15);
+    color: white;
+}
+
+.tool-float-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    font-size: 1.2rem;
+    background: rgba(255, 255, 255, 0.16);
+    flex-shrink: 0;
+}
+
+.tool-float-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.tool-float-text strong {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: white;
+}
+
+.tool-float-text span {
+    font-size: 0.84rem;
+    color: #dbeafe;
+    line-height: 1.35;
+}
+
+.tool-float-1 {
+    top: 16%;
+    left: clamp(24px, 8vw, 150px);
+}
+
+.tool-float-2 {
+    top: 18%;
+    right: clamp(24px, 8vw, 150px);
+}
+
+.tool-float-3 {
+    bottom: 17%;
+    left: clamp(24px, 9vw, 170px);
+}
+
+.tool-float-4 {
+    bottom: 16%;
+    right: clamp(24px, 9vw, 170px);
+}
+
+@keyframes floatSoft {
+    0%, 100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.tool-float-1,
+.tool-float-4 {
+    animation: floatSoft 7s ease-in-out infinite;
+}
+
+.tool-float-2,
+.tool-float-3 {
+    animation: floatSoft 8s ease-in-out infinite;
+}
+
+/* =========================================================
    Responsive Design
    ========================================================= */
+
+@media (max-width: 1100px) {
+    .tool-float {
+        display: none;
+    }
+
+    .auth-card.register-card {
+        width: min(100%, 520px);
+    }
+}
 
 @media (max-width: 980px) {
     .features-grid {
@@ -948,238 +1227,26 @@ a {
         flex-direction: column;
         gap: 6px;
     }
-}
-/* =========================================================
-   Centered Register Page Layout
-   Only for register page
-   ========================================================= */
-
-.auth-page-centered {
-    min-height: 100vh;
-    overflow: hidden;
-    position: relative;
-}
-
-.auth-center-shell {
-    position: relative;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 48px 24px;
-    overflow: hidden;
-}
-
-/* Decorative orbs */
-.auth-bg-orb {
-    position: absolute;
-    border-radius: 999px;
-    filter: blur(80px);
-    opacity: 0.55;
-    pointer-events: none;
-    z-index: 0;
-}
-
-.auth-bg-orb-1 {
-    width: 340px;
-    height: 340px;
-    top: -60px;
-    left: -60px;
-    background: rgba(6, 182, 212, 0.28);
-}
-
-.auth-bg-orb-2 {
-    width: 420px;
-    height: 420px;
-    right: -120px;
-    bottom: -120px;
-    background: rgba(255, 159, 28, 0.22);
-}
-
-/* Grid overlay */
-.auth-bg-grid {
-    position: absolute;
-    inset: 0;
-    background-image:
-        linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px);
-    background-size: 44px 44px;
-    mask-image: linear-gradient(to bottom, black, transparent 92%);
-    pointer-events: none;
-    z-index: 0;
-}
-
-/* Register card */
-.register-card {
-    position: relative;
-    z-index: 3;
-    width: 100%;
-    max-width: 500px;
-    padding: 34px 34px 30px;
-    border-radius: 30px;
-    background: rgba(255, 255, 255, 0.96);
-    border: 1px solid rgba(226, 232, 240, 0.95);
-    box-shadow:
-        0 30px 90px rgba(2, 8, 23, 0.28),
-        0 10px 24px rgba(2, 8, 23, 0.12);
-    backdrop-filter: blur(18px);
-}
-
-/* Brand inside register card */
-.register-brand {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    text-decoration: none;
-    color: #06172f;
-    font-weight: 900;
-    font-size: 1.08rem;
-    margin-bottom: 18px;
-}
-
-.register-card .auth-card-header {
-    text-align: left;
-    margin-bottom: 24px;
-}
-
-.register-card .auth-card-header h2 {
-    margin: 0 0 10px;
-    color: #06172f;
-    font-size: 2.05rem;
-    line-height: 1.05;
-    font-weight: 900;
-    letter-spacing: -0.04em;
-}
-
-.register-card .auth-card-header p {
-    margin: 0;
-    color: #64748b;
-    font-size: 0.98rem;
-    line-height: 1.6;
-}
-
-/* Success message */
-.auth-success {
-    margin-bottom: 20px;
-    padding: 14px 16px;
-    border-radius: 14px;
-    color: #166534;
-    background: #dcfce7;
-    border: 1px solid #bbf7d0;
-    font-weight: 700;
-    font-size: 0.92rem;
-}
-
-/* Floating tool panels */
-.tool-float {
-    position: absolute;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    min-width: 210px;
-    padding: 16px 18px;
-    border-radius: 20px;
-    background: rgba(255, 255, 255, 0.12);
-    border: 1px solid rgba(255, 255, 255, 0.16);
-    backdrop-filter: blur(16px);
-    box-shadow: 0 16px 40px rgba(2, 8, 23, 0.18);
-    color: white;
-}
-
-.tool-float-icon {
-    width: 46px;
-    height: 46px;
-    border-radius: 14px;
-    display: grid;
-    place-items: center;
-    font-size: 1.2rem;
-    background: rgba(255, 255, 255, 0.16);
-    flex-shrink: 0;
-}
-
-.tool-float-text {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.tool-float-text strong {
-    font-size: 0.95rem;
-    font-weight: 800;
-    color: white;
-}
-
-.tool-float-text span {
-    font-size: 0.84rem;
-    color: #dbeafe;
-    line-height: 1.35;
-}
-
-.tool-float-1 {
-    top: 12%;
-    left: 7%;
-}
-
-.tool-float-2 {
-    top: 18%;
-    right: 8%;
-}
-
-.tool-float-3 {
-    bottom: 16%;
-    left: 8%;
-}
-
-.tool-float-4 {
-    bottom: 14%;
-    right: 9%;
-}
-
-/* Better spacing for centered form */
-.register-card .auth-form {
-    gap: 16px;
-}
-
-.register-card .form-group input,
-.register-card .form-group select {
-    min-height: 54px;
-    border-radius: 18px;
-}
-
-.register-card .auth-submit {
-    margin-top: 10px;
-}
-
-/* Mobile */
-@media (max-width: 1100px) {
-    .tool-float {
-        min-width: 180px;
-        padding: 14px 16px;
-    }
-
-    .tool-float-1 { left: 3%; }
-    .tool-float-2 { right: 3%; }
-    .tool-float-3 { left: 4%; }
-    .tool-float-4 { right: 4%; }
-}
-
-@media (max-width: 900px) {
-    .tool-float {
-        display: none;
-    }
 
     .auth-center-shell {
-        padding: 26px 16px;
+        padding: 22px 14px;
     }
 
-    .register-card {
-        max-width: 100%;
-        padding: 28px 22px 24px;
-        border-radius: 24px;
+    .auth-card.register-card {
+        padding: 28px 22px;
+        border-radius: 26px;
     }
 
-    .register-card .auth-card-header h2 {
-        font-size: 1.8rem;
+    .register-card .auth-card-header {
+        text-align: left;
+    }
+
+    .register-brand {
+        justify-content: flex-start;
+        margin-left: 0;
+    }
+
+    .register-card .auth-card-header p {
+        margin-left: 0;
     }
 }
