@@ -1,5 +1,5 @@
 <?php
-// Suppress non-fatal notices to prevent "Headers already sent" errors
+// Suppress non-fatal notices to ensure redirects work
 error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED);
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -12,4 +12,15 @@ function require_login() {
         exit();
     }
 }
-// ... rest of your functions
+
+function require_role($role) {
+    require_login();
+    if ($_SESSION['role'] !== $role) {
+        header('Location: /auth/login.php');
+        exit();
+    }
+}
+
+function is_logged_in() {
+    return isset($_SESSION['user_id']);
+}

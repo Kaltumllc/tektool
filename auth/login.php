@@ -2,6 +2,9 @@
 require_once '../config/db.php';
 require_once '../includes/auth_guard.php';
 
+// auth_guard.php already handles session_start() and error_reporting,
+// so we don't need to add them here.
+
 if (is_logged_in()) {
     header('Location: /index.php');
     exit();
@@ -23,7 +26,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user   = mysqli_fetch_assoc($result);
 
         if ($user && password_verify($password, $user['password'])) {
-            session_start();
+            // REMOVED: session_start(); (It is already started in auth_guard.php)
+            
             $_SESSION['user_id']   = $user['id'];
             $_SESSION['full_name'] = $user['full_name'];
             $_SESSION['role']      = $user['role'];
@@ -39,6 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 case 'junior': header('Location: /junior/dashboard.php'); break;
                 case 'senior': header('Location: /senior/dashboard.php'); break;
                 case 'admin':  header('Location: /admin/dashboard.php');  break;
+                default: header('Location: /index.php'); break;
             }
             exit();
         } else {
@@ -68,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="form-group">
                 <label>Email Address</label>
                 <input type="email" name="email" placeholder="you@company.com"
-                       value="<?= htmlspecialchars($_POST['email'] ?? '') ?>" required>
+                       value="<?= htmlspecialchars($email) ?>" required>
             </div>
             <div class="form-group">
                 <label>Password</label>
