@@ -11,7 +11,6 @@ $resolved       = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as c F
 $seniors_avail  = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as c FROM availability WHERE is_available=1"))['c'] ?? 0;
 
 // 2. Recent activity - Audit Log
-// FIX: column is 'created_at' not 'logged_at'
 $activity = mysqli_query($conn, "
     SELECT al.action, al.created_at, u.full_name
     FROM audit_log al
@@ -80,9 +79,16 @@ require_once '../includes/header.php';
                                 <?= $req['senior_name'] ? '→ ' . htmlspecialchars($req['senior_name']) : '' ?>
                             </span>
                         </div>
-                        <span class="status-badge status-<?= $req['status'] ?>">
-                            <?= ucfirst(str_replace('_', ' ', $req['status'])) ?>
-                        </span>
+                        
+                        <div class="request-actions" style="display: flex; gap: 10px; align-items: center;">
+                            <span class="status-badge status-<?= $req['status'] ?>">
+                                <?= ucfirst(str_replace('_', ' ', $req['status'])) ?>
+                            </span>
+                            <a href="/admin/manage_request.php?id=<?= $req['id'] ?>" 
+                               style="background: #1a365d; color: white; padding: 4px 10px; border-radius: 4px; text-decoration: none; font-size: 0.75rem;">
+                               Manage
+                            </a>
+                        </div>
                     </div>
                 <?php endwhile; ?>
             <?php endif; ?>
@@ -101,7 +107,6 @@ require_once '../includes/header.php';
                             <span class="activity-user"><strong><?= htmlspecialchars($log['full_name'] ?? 'System') ?></strong></span>
                             <span class="activity-action"><?= htmlspecialchars($log['action']) ?></span>
                         </div>
-                        <!-- FIX: use created_at not logged_at -->
                         <span class="activity-time"><?= date('M j, g:i A', strtotime($log['created_at'])) ?></span>
                     </div>
                 <?php endwhile; ?>
