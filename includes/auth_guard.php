@@ -1,7 +1,7 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED);
 
-// Fix session persistence on production server
+// Fix session persistence on production HTTPS server (Render)
 ini_set('session.cookie_samesite', 'Lax');
 ini_set('session.cookie_secure', '1');
 ini_set('session.cookie_httponly', '1');
