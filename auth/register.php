@@ -2,7 +2,15 @@
 require_once '../config/db.php';
 require_once '../includes/auth_guard.php';
 
-if (is_logged_in()) {
+/*
+|--------------------------------------------------------------------------
+| Access Control
+|--------------------------------------------------------------------------
+| Guests can register normally.
+| Admins can also use this page to create Field Tech / Lead Tech users.
+| Other logged-in users should be redirected away.
+*/
+if (is_logged_in() && ($_SESSION['role'] ?? '') !== 'admin') {
     header('Location: /index.php');
     exit();
 }
@@ -14,6 +22,8 @@ $full_name = '';
 $email = '';
 $role = '';
 
+$is_admin_creating_user = is_logged_in() && ($_SESSION['role'] ?? '') === 'admin';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $full_name = trim($_POST['full_name'] ?? '');
     $email     = trim($_POST['email'] ?? '');
@@ -21,6 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $confirm   = $_POST['confirm_password'] ?? '';
     $role      = $_POST['role'] ?? '';
 
+    // Public/admin registration should only create Field Tech or Lead Tech users
     $allowed_roles = ['junior', 'senior'];
 
     if (empty($full_name) || empty($email) || empty($password) || empty($confirm) || empty($role)) {
@@ -34,6 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (!in_array($role, $allowed_roles, true)) {
         $error = 'Invalid role selected.';
     } else {
+        // Check if email already exists
         $stmt = mysqli_prepare($conn, "SELECT id FROM users WHERE email = ?");
 
         if ($stmt) {
@@ -57,6 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if (mysqli_stmt_execute($stmt2)) {
                         $user_id = mysqli_insert_id($conn);
 
+                        // If Lead Tech, create availability row
                         if ($role === 'senior') {
                             $stmt3 = mysqli_prepare(
                                 $conn,
@@ -69,18 +82,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             }
                         }
 
-                        $action = "New {$role} registered: {$email}";
+                        // Audit log
+                        if ($is_admin_creating_user) {
+                            $admin_id = (int)($_SESSION['user_id'] ?? 0);
+                            $action = "Admin #{$admin_id} created new {$role} user: {$email}";
+                            $log_user_id = $admin_id;
+                        } else {
+                            $action = "New {$role} registered: {$email}";
+                            $log_user_id = $user_id;
+                        }
+
                         $stmt4 = mysqli_prepare(
                             $conn,
                             "INSERT INTO audit_log (user_id, action) VALUES (?, ?)"
                         );
 
                         if ($stmt4) {
-                            mysqli_stmt_bind_param($stmt4, 'is', $user_id, $action);
+                            mysqli_stmt_bind_param($stmt4, 'is', $log_user_id, $action);
                             mysqli_stmt_execute($stmt4);
                         }
 
-                        $success = 'Account created successfully.';
+                        $success = $is_admin_creating_user
+                            ? 'User account created successfully.'
+                            : 'Account created successfully.';
+
+                        // Clear form after successful registration
                         $full_name = '';
                         $email = '';
                         $role = '';
@@ -91,11 +117,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $error = 'Registration system error. Please try again later.';
                 }
             }
+
+            mysqli_stmt_close($stmt);
         } else {
             $error = 'Registration system error. Please try again later.';
         }
     }
 }
+
+$page_title = $is_admin_creating_user ? 'Add User — TekTool' : 'Create Account — TekTool';
+$heading    = $is_admin_creating_user ? 'Add New User' : 'Create Account';
+$subtext    = $is_admin_creating_user
+    ? 'Create a Field Tech or Lead Tech account for your TekTool team.'
+    : 'Join TekTool to submit requests, collaborate with lead techs, and build reusable field knowledge.';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -104,9 +138,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Create Account — TekTool</title>
+    <title><?= htmlspecialchars($page_title) ?></title>
 
-    <link rel="stylesheet" href="/assets/css/style.css?v=20260505">
+    <link rel="stylesheet" href="/assets/css/style.css?v=20260505-4">
 </head>
 
 <body class="auth-page auth-page-centered">
@@ -152,16 +186,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <section class="auth-card register-card">
 
             <div class="auth-card-header">
-                <a href="/" class="register-brand">
+                <a href="<?= $is_admin_creating_user ? '/admin/manage_users.php' : '/' ?>" class="register-brand">
                     <span class="brand-icon">⚙️</span>
                     <span>TekTool</span>
                 </a>
 
-                <h2>Create Account</h2>
+                <h2><?= htmlspecialchars($heading) ?></h2>
 
                 <p>
-                    Join TekTool to submit requests, collaborate with lead techs,
-                    and build reusable field knowledge.
+                    <?= htmlspecialchars($subtext) ?>
                 </p>
             </div>
 
@@ -174,7 +207,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php if (!empty($success)): ?>
                 <div class="auth-success">
                     <?= htmlspecialchars($success) ?>
-                    <a href="/auth/login.php"> Sign in here.</a>
+
+                    <?php if ($is_admin_creating_user): ?>
+                        <a href="/admin/manage_users.php"> Back to Manage Users.</a>
+                    <?php else: ?>
+                        <a href="/auth/login.php"> Sign in here.</a>
+                    <?php endif; ?>
                 </div>
             <?php endif; ?>
 
@@ -234,7 +272,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <label for="role">My Role</label>
 
                     <select id="role" name="role" required>
-                        <option value="">Select your role</option>
+                        <option value="">Select role</option>
 
                         <option value="junior" <?= ($role === 'junior') ? 'selected' : '' ?>>
                             Field Tech
@@ -247,19 +285,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <button type="submit" class="auth-submit">
-                    Create Account
+                    <?= $is_admin_creating_user ? 'Create User' : 'Create Account' ?>
                 </button>
 
             </form>
 
-            <p class="auth-switch">
-                Already have an account?
-                <a href="/auth/login.php">Sign in</a>
-            </p>
+            <?php if ($is_admin_creating_user): ?>
+                <p class="auth-switch">
+                    Finished?
+                    <a href="/admin/manage_users.php">Return to Manage Users</a>
+                </p>
 
-            <a href="/" class="back-home">
-                ← Back to home
-            </a>
+                <a href="/admin/dashboard.php" class="back-home">
+                    ← Back to Admin Dashboard
+                </a>
+            <?php else: ?>
+                <p class="auth-switch">
+                    Already have an account?
+                    <a href="/auth/login.php">Sign in</a>
+                </p>
+
+                <a href="/" class="back-home">
+                    ← Back to home
+                </a>
+            <?php endif; ?>
 
         </section>
 
