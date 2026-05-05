@@ -1,22 +1,19 @@
 <?php
-// Use Environment Variables for production (Render/Aiven) 
-// and fall back to local settings for XAMPP
-define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
-define('DB_USER', getenv('DB_USER') ?: 'root');
-define('DB_PASS', getenv('DB_PASS') ?: '');
-define('DB_NAME', getenv('DB_NAME') ?: 'tektool');
-define('APP_NAME', 'TekTool');
+$host = getenv('DB_HOST');
+$user = getenv('DB_USER');
+$pass = getenv('DB_PASS');
+$db_name = getenv('DB_NAME');
+$port = getenv('DB_PORT') ?: 4000;
 
-// The secret key is now pulled from the server's environment settings
-define('ANTHROPIC_API_KEY', getenv('ANTHROPIC_API_KEY') ?: '');
+// Initialize mysqli
+$conn = mysqli_init();
 
-$conn = mysqli_connect(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+// TiDB Cloud requires SSL. We don't need a specific CA file 
+// for most PHP environments on Render as they use the system certs.
+mysqli_ssl_set($conn, NULL, NULL, NULL, NULL, NULL);
 
-if (!$conn) {
-    die(json_encode([
-        'error' => 'Database connection failed: ' . mysqli_connect_error()
-    ]));
+// Establish the connection
+if (!mysqli_real_connect($conn, $host, $user, $pass, $db_name, $port, NULL, MYSQLI_CLIENT_SSL)) {
+    die("Connection failed: " . mysqli_connect_error());
 }
-
-mysqli_set_charset($conn, 'utf8mb4');
 ?>
