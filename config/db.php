@@ -4,6 +4,9 @@ define('APP_NAME', 'TekTool');
 define('APP_VERSION', '1.0.0');
 define('BASE_URL', 'https://tektool.onrender.com');
 
+// --- API KEYS ---
+define('ANTHROPIC_API_KEY', getenv('ANTHROPIC_API_KEY'));
+
 // --- DATABASE CONFIGURATION ---
 $host    = getenv('DB_HOST');
 $user    = getenv('DB_USER');
