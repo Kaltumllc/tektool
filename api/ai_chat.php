@@ -1,20 +1,26 @@
 <?php
 require_once '../config/db.php';
 require_once '../includes/auth_guard.php';
-require_login();
 
 header('Content-Type: application/json');
 
+// For AJAX requests, return JSON error instead of redirecting
+if (!is_logged_in()) {
+    echo json_encode(['error' => 'Session expired. Please refresh the page and log in again.']);
+    exit();
+}
+
 // Rate limiting — max 20 AI requests per user per hour
+// FIX: use created_at not logged_at
 $user_id  = $_SESSION['user_id'];
 $one_hour = date('Y-m-d H:i:s', strtotime('-1 hour'));
 $rate     = mysqli_fetch_assoc(mysqli_query($conn,
     "SELECT COUNT(*) as c FROM audit_log
      WHERE user_id = $user_id
      AND action LIKE 'AI chat%'
-     AND logged_at > '$one_hour'"
+     AND created_at > '$one_hour'"
 ));
-if ($rate['c'] >= 20) {
+if (($rate['c'] ?? 0) >= 20) {
     echo json_encode(['error' => 'Rate limit reached. Max 20 AI requests per hour.']);
     exit();
 }
@@ -48,6 +54,12 @@ if ($context) {
     $system .= "\n\nCurrent request context: $context";
 }
 
+// Verify API key is loaded
+if (!defined('ANTHROPIC_API_KEY') || !ANTHROPIC_API_KEY) {
+    echo json_encode(['error' => 'TekBot is not configured. Contact your administrator.']);
+    exit();
+}
+
 // Call Anthropic API
 $payload = json_encode([
     'model'      => 'claude-haiku-4-5-20251001',
@@ -67,11 +79,13 @@ curl_setopt_array($ch, [
         'Content-Type: application/json',
         'x-api-key: ' . ANTHROPIC_API_KEY,
         'anthropic-version: 2023-06-01'
-    ]
+    ],
+    CURLOPT_TIMEOUT        => 30,
 ]);
 
 $response = curl_exec($ch);
 $err      = curl_error($ch);
+$httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 curl_close($ch);
 
 if ($err) {
@@ -92,7 +106,6 @@ if (isset($result['content'][0]['text'])) {
 
     // Save AI message to messages table
     if ($request_id) {
-        $ai_sender = 0;
         $stmt = mysqli_prepare($conn,
             "INSERT INTO messages (request_id, sender_id, body, is_ai) VALUES (?, ?, ?, 1)"
         );
@@ -102,8 +115,12 @@ if (isset($result['content'][0]['text'])) {
 
     echo json_encode(['reply' => $ai_response]);
 } else {
+    // Return detailed error for debugging
+    $api_error = $result['error']['message'] ?? 'Unknown API error';
+    $api_type  = $result['error']['type'] ?? '';
     echo json_encode([
-        'error' => $result['error']['message'] ?? 'Unknown API error'
+        'error' => $api_error,
+        'debug' => "HTTP $httpcode | Type: $api_type"
     ]);
 }
 ?>
