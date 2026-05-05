@@ -949,3 +949,237 @@ a {
         gap: 6px;
     }
 }
+/* =========================================================
+   Centered Register Page Layout
+   Only for register page
+   ========================================================= */
+
+.auth-page-centered {
+    min-height: 100vh;
+    overflow: hidden;
+    position: relative;
+}
+
+.auth-center-shell {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+    overflow: hidden;
+}
+
+/* Decorative orbs */
+.auth-bg-orb {
+    position: absolute;
+    border-radius: 999px;
+    filter: blur(80px);
+    opacity: 0.55;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.auth-bg-orb-1 {
+    width: 340px;
+    height: 340px;
+    top: -60px;
+    left: -60px;
+    background: rgba(6, 182, 212, 0.28);
+}
+
+.auth-bg-orb-2 {
+    width: 420px;
+    height: 420px;
+    right: -120px;
+    bottom: -120px;
+    background: rgba(255, 159, 28, 0.22);
+}
+
+/* Grid overlay */
+.auth-bg-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: linear-gradient(to bottom, black, transparent 92%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Register card */
+.register-card {
+    position: relative;
+    z-index: 3;
+    width: 100%;
+    max-width: 500px;
+    padding: 34px 34px 30px;
+    border-radius: 30px;
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid rgba(226, 232, 240, 0.95);
+    box-shadow:
+        0 30px 90px rgba(2, 8, 23, 0.28),
+        0 10px 24px rgba(2, 8, 23, 0.12);
+    backdrop-filter: blur(18px);
+}
+
+/* Brand inside register card */
+.register-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: #06172f;
+    font-weight: 900;
+    font-size: 1.08rem;
+    margin-bottom: 18px;
+}
+
+.register-card .auth-card-header {
+    text-align: left;
+    margin-bottom: 24px;
+}
+
+.register-card .auth-card-header h2 {
+    margin: 0 0 10px;
+    color: #06172f;
+    font-size: 2.05rem;
+    line-height: 1.05;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+}
+
+.register-card .auth-card-header p {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.98rem;
+    line-height: 1.6;
+}
+
+/* Success message */
+.auth-success {
+    margin-bottom: 20px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    color: #166534;
+    background: #dcfce7;
+    border: 1px solid #bbf7d0;
+    font-weight: 700;
+    font-size: 0.92rem;
+}
+
+/* Floating tool panels */
+.tool-float {
+    position: absolute;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 210px;
+    padding: 16px 18px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 16px 40px rgba(2, 8, 23, 0.18);
+    color: white;
+}
+
+.tool-float-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    font-size: 1.2rem;
+    background: rgba(255, 255, 255, 0.16);
+    flex-shrink: 0;
+}
+
+.tool-float-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.tool-float-text strong {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: white;
+}
+
+.tool-float-text span {
+    font-size: 0.84rem;
+    color: #dbeafe;
+    line-height: 1.35;
+}
+
+.tool-float-1 {
+    top: 12%;
+    left: 7%;
+}
+
+.tool-float-2 {
+    top: 18%;
+    right: 8%;
+}
+
+.tool-float-3 {
+    bottom: 16%;
+    left: 8%;
+}
+
+.tool-float-4 {
+    bottom: 14%;
+    right: 9%;
+}
+
+/* Better spacing for centered form */
+.register-card .auth-form {
+    gap: 16px;
+}
+
+.register-card .form-group input,
+.register-card .form-group select {
+    min-height: 54px;
+    border-radius: 18px;
+}
+
+.register-card .auth-submit {
+    margin-top: 10px;
+}
+
+/* Mobile */
+@media (max-width: 1100px) {
+    .tool-float {
+        min-width: 180px;
+        padding: 14px 16px;
+    }
+
+    .tool-float-1 { left: 3%; }
+    .tool-float-2 { right: 3%; }
+    .tool-float-3 { left: 4%; }
+    .tool-float-4 { right: 4%; }
+}
+
+@media (max-width: 900px) {
+    .tool-float {
+        display: none;
+    }
+
+    .auth-center-shell {
+        padding: 26px 16px;
+    }
+
+    .register-card {
+        max-width: 100%;
+        padding: 28px 22px 24px;
+        border-radius: 24px;
+    }
+
+    .register-card .auth-card-header h2 {
+        font-size: 1.8rem;
+    }
+}
