@@ -11,7 +11,6 @@ if (!is_logged_in()) {
 }
 
 // Rate limiting — max 20 AI requests per user per hour
-// FIX: use created_at not logged_at
 $user_id  = $_SESSION['user_id'];
 $one_hour = date('Y-m-d H:i:s', strtotime('-1 hour'));
 $rate     = mysqli_fetch_assoc(mysqli_query($conn,
@@ -35,7 +34,6 @@ if (empty($message)) {
     exit();
 }
 
-// Build system prompt
 $system = "You are TekBot, an expert field technician assistant for C&W Services. 
 You help junior and senior technicians solve real job site problems including:
 - Electrical systems (LOTO, panels, wiring, motors)
@@ -54,13 +52,11 @@ if ($context) {
     $system .= "\n\nCurrent request context: $context";
 }
 
-// Verify API key is loaded
 if (!defined('ANTHROPIC_API_KEY') || !ANTHROPIC_API_KEY) {
     echo json_encode(['error' => 'TekBot is not configured. Contact your administrator.']);
     exit();
 }
 
-// Call Anthropic API
 $payload = json_encode([
     'model'      => 'claude-haiku-4-5-20251001',
     'max_tokens' => 1024,
@@ -101,21 +97,27 @@ if (isset($result['content'][0]['text'])) {
     // Log to audit
     $action = "AI chat used on request #$request_id by user #$user_id";
     $log = mysqli_prepare($conn, "INSERT INTO audit_log (user_id, action) VALUES (?, ?)");
-    mysqli_stmt_bind_param($log, 'is', $user_id, $action);
-    mysqli_stmt_execute($log);
+    if ($log) {
+        mysqli_stmt_bind_param($log, 'is', $user_id, $action);
+        mysqli_stmt_execute($log);
+        mysqli_stmt_close($log);
+    }
 
-    // Save AI message to messages table
+    // FIX: guard messages insert so failure doesn't kill the response
     if ($request_id) {
         $stmt = mysqli_prepare($conn,
             "INSERT INTO messages (request_id, sender_id, body, is_ai) VALUES (?, ?, ?, 1)"
         );
-        mysqli_stmt_bind_param($stmt, 'iis', $request_id, $user_id, $ai_response);
-        mysqli_stmt_execute($stmt);
+        if ($stmt) {
+            mysqli_stmt_bind_param($stmt, 'iis', $request_id, $user_id, $ai_response);
+            mysqli_stmt_execute($stmt);
+            mysqli_stmt_close($stmt);
+        }
     }
 
+    // Always return the reply regardless of logging success
     echo json_encode(['reply' => $ai_response]);
 } else {
-    // Return detailed error for debugging
     $api_error = $result['error']['message'] ?? 'Unknown API error';
     $api_type  = $result['error']['type'] ?? '';
     echo json_encode([
