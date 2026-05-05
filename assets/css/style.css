@@ -2244,3 +2244,65 @@ body.app-page form[method="GET"] input[type="text"] {
         width: 100%;
     }
 }
+/* =========================================================
+   FINAL ROLE BADGE ICON + CONTRAST FIX
+   Add at the VERY BOTTOM of style.css
+   ========================================================= */
+
+/* Make table/user role badges clearer */
+body.app-page .badge {
+    gap: 6px;
+    font-weight: 900;
+}
+
+/* Admin badge */
+body.app-page .badge-admin {
+    color: #1d4ed8;
+    background: #dbeafe;
+    border: 1px solid #bfdbfe;
+}
+
+body.app-page .badge-admin::before {
+    content: "🛡️";
+}
+
+/* Lead Tech badge */
+body.app-page .badge-senior {
+    color: #047857;
+    background: #d1fae5;
+    border: 1px solid #a7f3d0;
+}
+
+body.app-page .badge-senior::before {
+    content: "🛠️";
+}
+
+/* Field Tech badge */
+body.app-page .badge-junior {
+    color: #c2410c;
+    background: #ffedd5;
+    border: 1px solid #fed7aa;
+}
+
+body.app-page .badge-junior::before {
+    content: "🧰";
+}
+
+/* Keep navbar user badge readable on dark background */
+body.app-page .nav-user .badge-admin {
+    color: #dbeafe;
+    background: rgba(11, 92, 255, 0.24);
+    border: 1px solid rgba(147, 197, 253, 0.35);
+}
+
+body.app-page .nav-user .badge-senior {
+    color: #dcfce7;
+    background: rgba(16, 185, 129, 0.20);
+    border: 1px solid rgba(134, 239, 172, 0.30);
+}
+
+body.app-page .nav-user .badge-junior {
+    color: #ffedd5;
+    background: rgba(249, 115, 22, 0.20);
+    border: 1px solid rgba(253, 186, 116, 0.30);
+}

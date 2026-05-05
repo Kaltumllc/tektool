@@ -38,6 +38,8 @@ $nav_links = [
     ],
     'senior' => [
         ['label' => 'Dashboard',    'href' => '/senior/dashboard.php',        'icon' => '📊'],
+        ['label' => 'New Request',  'href' => '/junior/submit_request.php',   'icon' => '➕'],
+        ['label' => 'My Requests',  'href' => '/senior/my_requests.php',      'icon' => '📋'],
         ['label' => 'Availability', 'href' => '/senior/set_availability.php', 'icon' => '🟢'],
     ],
     'admin' => [

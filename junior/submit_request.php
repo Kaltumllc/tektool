@@ -1,11 +1,21 @@
 <?php
 require_once '../config/db.php';
 require_once '../includes/auth_guard.php';
-require_role('junior');
+
+// Both junior AND senior techs can submit help requests
+require_login();
+if (!in_array($_SESSION['role'], ['junior', 'senior'])) {
+    header('Location: /index.php');
+    exit();
+}
 
 $user_id = $_SESSION['user_id'];
+$role    = $_SESSION['role'];
 $error   = '';
 $success = '';
+
+$back_href     = $role === 'senior' ? '/senior/dashboard.php'   : '/junior/dashboard.php';
+$requests_href = $role === 'senior' ? '/senior/my_requests.php' : '/junior/my_requests.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title       = trim($_POST['title'] ?? '');
@@ -14,11 +24,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($title) || empty($description)) {
         $error = 'Title and description are required.';
     } else {
-        // Find first available senior (FIX: use last_updated not updated_at)
+        // Find first available senior — exclude self if submitter is also a senior
         $senior = mysqli_fetch_assoc(mysqli_query($conn,
             "SELECT u.id FROM users u
              JOIN availability a ON u.id = a.senior_id
-             WHERE u.role = 'senior' AND a.is_available = 1
+             WHERE u.role = 'senior'
+               AND a.is_available = 1
+               AND u.id != $user_id
              ORDER BY a.last_updated ASC
              LIMIT 1"
         ));
@@ -26,7 +38,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $senior_id = $senior['id'] ?? null;
         $status    = $senior_id ? 'in_progress' : 'open';
 
-        // FIX: Only insert columns that exist in help_requests table
         $stmt = mysqli_prepare($conn,
             "INSERT INTO help_requests (junior_id, senior_id, title, description, status)
              VALUES (?, ?, ?, ?, ?)"
@@ -38,19 +49,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (mysqli_stmt_execute($stmt)) {
             $request_id = mysqli_insert_id($conn);
 
-            // Audit log
-            $action = "New request #$request_id submitted by junior #$user_id";
+            $action = "New request #$request_id submitted by {$role} #{$user_id}";
             $log = mysqli_prepare($conn,
                 "INSERT INTO audit_log (user_id, action) VALUES (?, ?)"
             );
             mysqli_stmt_bind_param($log, 'is', $user_id, $action);
             mysqli_stmt_execute($log);
 
-            if ($senior_id) {
-                $success = "Request submitted and assigned to a senior technician!";
-            } else {
-                $success = "Request submitted! We'll assign a senior technician shortly.";
-            }
+            $success = $senior_id
+                ? "Request submitted and assigned to a senior technician!"
+                : "Request submitted! A senior technician will be assigned shortly.";
         } else {
             $error = 'Failed to submit request. Please try again.';
         }
@@ -62,7 +70,7 @@ require_once '../includes/header.php';
 
 <div class="page-header">
     <h1>Submit Help Request</h1>
-    <a href="/junior/dashboard.php" class="btn btn-outline btn-sm">← Back</a>
+    <a href="<?= $back_href ?>" class="btn btn-outline btn-sm">← Back</a>
 </div>
 
 <?php if ($error): ?>
@@ -71,7 +79,7 @@ require_once '../includes/header.php';
 <?php if ($success): ?>
     <div class="alert alert-success">
         <?= htmlspecialchars($success) ?>
-        <a href="/junior/my_requests.php"> View my requests →</a>
+        <a href="<?= $requests_href ?>"> View my requests →</a>
     </div>
 <?php endif; ?>
 
@@ -94,7 +102,7 @@ require_once '../includes/header.php';
             </div>
             <div style="display:flex; gap:1rem; flex-wrap:wrap;">
                 <button type="submit" class="btn btn-primary">Submit Request</button>
-                <a href="/junior/dashboard.php" class="btn btn-outline">Cancel</a>
+                <a href="<?= $back_href ?>" class="btn btn-outline">Cancel</a>
             </div>
         </form>
     </div>
